@@ -6,13 +6,15 @@ import Home from './window/Home';
 const BankRouter = () => {
   const user = true;
   return (
-    <Routes>
+    <div>
+      <Routes>
       {user ? (
         <Route path={'/'} element={<Home />} />
       ) : (
         <Route path={'/'} element={<Login />} />
       )}
     </Routes>
+    </div>
   );
 };
 

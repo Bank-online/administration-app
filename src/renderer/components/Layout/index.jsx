@@ -15,8 +15,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
+import BankRouter from 'renderer/BankRouter';
 
-const drawerWidth = 240;
+const drawerWidth = 250;
 
 const styles = (theme) => ({
   root: {
@@ -81,7 +82,8 @@ const styles = (theme) => ({
   content: {
     flexGrow: 1,
     padding: theme.spacing.unit * 3,
-    height: '100vh',
+    marginTop: '4em',
+    height: '90vh',
     overflow: 'auto',
   },
   chartContainer: {
@@ -96,9 +98,13 @@ const styles = (theme) => ({
 });
 
 class Dashboard extends React.Component {
-  state = {
-    open: true,
-  };
+  constructor(props) {
+    super(props);
+    this.props = props;
+    this.state = {
+      open: false,
+    };
+  }
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -110,6 +116,7 @@ class Dashboard extends React.Component {
 
   render() {
     const { classes } = this.props;
+    console.log(this.props.children);
 
     return (
       <div className={classes.root}>
@@ -172,9 +179,7 @@ class Dashboard extends React.Component {
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-        </main>
+        <main className={classes.content}>{this.props.children}</main>
       </div>
     );
   }
