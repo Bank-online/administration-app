@@ -1,6 +1,10 @@
 import React from 'react';
 import BankRouter from './BankRouter';
+import Layout from './components/Layout';
 
 export default function App() {
-  return <BankRouter />;
+  return(<Layout>
+     <BankRouter />
+     </Layout>
+     );
 }

@@ -4,7 +4,7 @@ import Login from './window/Login';
 import Home from './window/Home';
 
 const BankRouter = () => {
-  const user = false;
+  const user = true;
   return (
     <Routes>
       {user ? (
