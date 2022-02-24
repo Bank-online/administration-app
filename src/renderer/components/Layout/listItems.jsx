@@ -44,8 +44,7 @@ export const mainListItems = (
     </ListItem>
   </div>
 );
-
-export const secondaryListItems = (
+ const secondaryListItems = (
   <div>
     <ListSubheader inset>Saved reports</ListSubheader>
     <ListItem button>
