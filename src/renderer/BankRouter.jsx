@@ -5,6 +5,7 @@ import Home from './window/Home';
 import { useRecoilState } from 'recoil';
 import userHelper from './helpers/UserHelper';
 import Logout from './window/Logout';
+import Bank from './window/Bank';
 const BankRouter = () => {
   const [user] = useRecoilState(userHelper.userAtom);
 
@@ -13,7 +14,7 @@ const BankRouter = () => {
       <Routes>
         {user ? (
           <>
-            <Route path={'/'} element={<Home />} />
+            <Route path={'/'} element={<Bank />} />
             <Route path={'/logout'} element={<Logout />} />
           </>
         ) : (
