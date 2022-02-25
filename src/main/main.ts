@@ -73,8 +73,8 @@ const createWindow = async () => {
     show: false,
     width: 1200,
     height: 728,
-    minWidth: 1024,
-    minHeight: 640,
+    minWidth: 1200,
+    minHeight: 728,
 
     icon: getAssetPath('bank.jpeg'),
     webPreferences: {

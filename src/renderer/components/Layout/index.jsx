@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -15,8 +15,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
-import BankRouter from 'renderer/BankRouter';
-
+import { useRecoilState } from 'recoil';
+import userHelper from '../../helpers/UserHelper';
 const drawerWidth = 250;
 
 const styles = (theme) => ({
@@ -97,80 +97,72 @@ const styles = (theme) => ({
   },
 });
 
-class Dashboard extends React.Component {
-  constructor(props) {
-    super(props);
-    this.props = props;
-    this.state = {
-      open: false,
-    };
-  }
+const Dashboard = (props) => {
+  const [open, setOpen] = useState(false);
+  const [user] = useRecoilState(userHelper.userAtom);
 
-  handleDrawerOpen = () => {
-    this.setState({ open: true });
+  const handleDrawerOpen = () => {
+    setOpen(true);
   };
 
-  handleDrawerClose = () => {
-    this.setState({ open: false });
+  const handleDrawerClose = () => {
+    setOpen(false);
   };
 
-  render() {
-    const { classes } = this.props;
-    console.log(this.props.children);
+  const { classes } = props;
 
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="absolute"
-          className={classNames(
-            classes.appBar,
-            this.state.open && classes.appBarShift
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="absolute"
+        className={classNames(classes.appBar, open && classes.appBarShift)}
+      >
+        <Toolbar disableGutters={!open} className={classes.toolbar}>
+          {user && (
+            <>
+              <IconButton
+                color="inherit"
+                aria-label="Open drawer"
+                onClick={handleDrawerOpen}
+                className={classNames(
+                  classes.menuButton,
+                  open && classes.menuButtonHidden
+                )}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                component="h1"
+                variant="h6"
+                color="inherit"
+                noWrap
+                className={classes.title}
+              >
+                Bank-online (supervisor)
+              </Typography>
+              <IconButton color="inherit">
+                <Badge badgeContent={4} color="secondary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </>
           )}
-        >
-          <Toolbar
-            disableGutters={!this.state.open}
-            className={classes.toolbar}
-          >
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(
-                classes.menuButton,
-                this.state.open && classes.menuButtonHidden
-              )}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              className={classes.title}
-            >
-              Bank-online (supervisor)
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+        </Toolbar>
+      </AppBar>
+      {user && (
         <Drawer
           variant="permanent"
           classes={{
             paper: classNames(
               classes.drawerPaper,
-              !this.state.open && classes.drawerPaperClose
+              !open && classes.drawerPaperClose
             ),
           }}
-          open={this.state.open}
+          open={open}
         >
           <div className={classes.toolbarIcon}>
-            <IconButton onClick={this.handleDrawerClose}>
+            <IconButton onClick={handleDrawerClose}>
               <ChevronLeftIcon />
             </IconButton>
           </div>
@@ -179,11 +171,12 @@ class Dashboard extends React.Component {
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
-        <main className={classes.content}>{this.props.children}</main>
-      </div>
-    );
-  }
-}
+      )}
+
+      <main className={classes.content}>{props.children}</main>
+    </div>
+  );
+};
 
 Dashboard.propTypes = {
   classes: PropTypes.object.isRequired,
