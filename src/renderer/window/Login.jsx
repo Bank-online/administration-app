@@ -10,14 +10,37 @@ import {
 } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-
-// Create an instance of Notyf
+import userHelper from '../helpers/UserHelper';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import jwtDecode from 'jwt-decode';
 
 export default function Login(props) {
+  const [, setUser] = useRecoilState(userHelper.userAtom);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const handelLogin = () => {
+    setLoading(true);
+    userHelper.service
+      .authenticate(email, password)
+      .then(({ data }) => {
+        return data.token;
+      })
+      .then((token) => {
+        localStorage.setItem('token', token);
+        return userHelper.service.getInfoUser(jwtDecode(token).uuid, token);
+      })
+      .then(({ data }) => {
+        setUser(data);
+      })
+      .catch((err) => {
+        localStorage.removeItem('token');
+        console.error(err);
+        setLoading(false);
+      });
+  };
 
   return (
     <Grid
@@ -31,8 +54,10 @@ export default function Login(props) {
       <Grid
         container
         item
-        xs={7}
-        md={4}
+        xs={5}
+        lg={4}
+        md={5}
+        xl={4}
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -58,7 +83,7 @@ export default function Login(props) {
           variant="outlined"
           type={showPassword ? 'text' : 'password'}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ marginBottom: '5%', color: 'red', marginTop: '20px' }}
+          style={{ marginBottom: '5%', color: 'blue', marginTop: '20px' }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -73,7 +98,7 @@ export default function Login(props) {
         <Button
           variant={'outlined'}
           color={'inherit'}
-          onClick={() => sendRequest()}
+          onClick={() => handelLogin()}
           disabled={loading}
         >
           {loading ? <CircularProgress /> : 'Se connecter'}

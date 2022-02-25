@@ -119,6 +119,16 @@ const Dashboard = (props) => {
         className={classNames(classes.appBar, open && classes.appBarShift)}
       >
         <Toolbar disableGutters={!open} className={classes.toolbar}>
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            className={classes.title}
+            style={{ paddingLeft: '4em' }}
+          >
+            🏦 Bank-online
+          </Typography>
           {user && (
             <>
               <IconButton
