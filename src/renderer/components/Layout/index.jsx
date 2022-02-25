@@ -17,6 +17,9 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import { useRecoilState } from 'recoil';
 import userHelper from '../../helpers/UserHelper';
+import Power from '@material-ui/icons/PowerSettingsNew';
+import { PowerInput } from '@material-ui/icons';
+import { useNavigate } from 'react-router-dom';
 const drawerWidth = 250;
 
 const styles = (theme) => ({
@@ -99,8 +102,8 @@ const styles = (theme) => ({
 
 const Dashboard = (props) => {
   const [open, setOpen] = useState(false);
-  const [user] = useRecoilState(userHelper.userAtom);
-
+  const [user, setUser] = useRecoilState(userHelper.userAtom);
+  const navigate = useNavigate();
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -119,16 +122,19 @@ const Dashboard = (props) => {
         className={classNames(classes.appBar, open && classes.appBarShift)}
       >
         <Toolbar disableGutters={!open} className={classes.toolbar}>
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.title}
-            style={{ paddingLeft: '4em' }}
-          >
-            🏦 Bank-online
-          </Typography>
+          {!user && (
+            <Typography
+              component="h1"
+              variant="h6"
+              color="inherit"
+              noWrap
+              className={classes.title}
+              style={{ paddingLeft: '4em' }}
+            >
+              🏦 Bank-online
+            </Typography>
+          )}
+
           {user && (
             <>
               <IconButton
@@ -149,12 +155,16 @@ const Dashboard = (props) => {
                 noWrap
                 className={classes.title}
               >
-                Bank-online (supervisor)
+                🏦 Bank-online
               </Typography>
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  localStorage.clear();
+                  navigate('/logout');
+                }}
+              >
+                <Power style={{ fontSize: '1.3em' }} />
               </IconButton>
             </>
           )}
