@@ -24,6 +24,8 @@ import Slide from '@mui/material/Slide';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 const steps = ['information bank', 'information directeur', 'Recapitulatif'];
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -32,7 +34,7 @@ const styles = (theme) => ({
   root: {
     flexGrow: 1,
     overFlow: 'hiden',
-    heigth: '80vh',
+    heigth: '86vh',
   },
   primaryColor: {
     color: teal[500],
@@ -51,7 +53,7 @@ const styles = (theme) => ({
   },
   mainContent: {
     padding: 20,
-    heigthmin: '100em',
+    heigthmin: '110em',
   },
   secondaryContainer: {
     padding: '20px 25px',
@@ -69,15 +71,90 @@ function BankModal(props) {
   const [cityBank, setCityBank] = useState('');
   const [numberEmploy, setNumberEmploy] = useState('');
   const [emailBank, setEmailBank] = useState('');
-  const [adressBank, setAdressBank] = useState('');
   const [directeurName, setDirecteurName] = useState('');
   const [directeurEmail, setDirecteurEmail] = useState('');
   const [directeurLastName, setDirecteurLastName] = useState('');
   const [confirme, setConfirme] = React.useState(false);
-
+  const [isloading, setLoading] = useState(false);
   const handleClickOpen = () => {
     setConfirme(true);
   };
+  const emailIsValid = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const [errorBankMessages, setErrorMessages] = useState({
+    bankname: '',
+    email: '',
+    ville: '',
+    pays: '',
+    adress: '',
+    nbemploy: '',
+    emailPro: '',
+    lastName: '',
+    name: '',
+  });
+
+  const ValidForm = (parti2 = null) => {
+    if (!parti2) {
+      if (handleRequired(nameBank, 'bankname', 'nom de la bank')) {
+        return false;
+      } else if (
+        handleRequired(emailBank, 'email', 'Email') ||
+        !emailIsValid(emailBank)
+      ) {
+        return false;
+      } else if (handleRequired(countryBank, 'pays', 'pays')) {
+        return false;
+      } else if (handleRequired(addressBank, 'adress', 'adresse')) {
+        return false;
+      } else if (handleRequired(numberEmploy, 'nbemploy', 'nombre employer')) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      if (
+        handleRequired(directeurEmail, 'emailPro', "l'email pro") ||
+        !emailIsValid(directeurEmail)
+      ) {
+        return false;
+      } else if (
+        handleRequired(directeurLastName, 'lastname', 'prenom du directeur')
+      ) {
+        return false;
+      } else if (handleRequired(directeurName, 'name', 'nom du directeur')) {
+        return false;
+      }
+      return true;
+    }
+  };
+
+  /**
+   * Fonction pour s'assurer que l'affichage du champ d'erreur soit pris en compte
+   * @param {String} value Valeur à l'intérieur
+   * @param {String} field Nom du champ dans le message d'erreur
+   * @param {String} requiredField La valeur du champ qu'on veut avoir
+   */
+  function handleRequired(value, field, requiredField) {
+    if (value === '') {
+      setErrorMessages((current) => {
+        return {
+          ...current,
+          [field]: requiredField + ' est un champs obligatoire',
+        };
+      });
+      return true;
+    } else {
+      setErrorMessages((current) => {
+        return {
+          ...current,
+          [field]: '',
+        };
+      });
+      return false;
+    }
+  }
 
   const handleClose = () => {
     setConfirme(false);
@@ -91,16 +168,41 @@ function BankModal(props) {
   };
 
   const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-    }
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
+    if (activeStep === 0 && !ValidForm()) {
+      handleRequired(nameBank, 'bankname', 'nom de la bank');
+      handleRequired(countryBank, 'pays', 'pays');
+      handleRequired(addressBank, 'adress', 'adresse');
+      handleRequired(numberEmploy, 'nbemploy', 'nombre employer');
+      handleRequired(cityBank, 'ville', 'viller');
+      if (!emailIsValid(emailBank)) {
+        setErrorMessages((current) => {
+          return {
+            ...current,
+            email: 'Email invalid.',
+          };
+        });
+      }
+    } else if (activeStep === 1 && !ValidForm('part2')) {
+      handleRequired(directeurLastName, 'lastName', 'prenom du directeur');
+      handleRequired(directeurName, 'name', 'nom du directeur');
+      if (!emailIsValid(emailBank)) {
+        setErrorMessages((current) => {
+          return {
+            ...current,
+            emailPro: 'Email invalid.',
+          };
+        });
+      }
+    } else {
+      let newSkipped = skipped;
+      if (isStepSkipped(activeStep)) {
+        newSkipped = new Set(newSkipped.values());
+        newSkipped.delete(activeStep);
+      }
 
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setSkipped(newSkipped);
+    }
   };
 
   const handleBack = () => {
@@ -108,8 +210,6 @@ function BankModal(props) {
   };
 
   const handleSkip = () => {
-  
-
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setSkipped((prevSkipped) => {
       const newSkipped = new Set(prevSkipped.values());
@@ -121,6 +221,16 @@ function BankModal(props) {
   const handleReset = () => {
     setActiveStep(0);
   };
+
+  const sendData =()=>{
+
+
+    setTimeout(() => {
+      setOpen(false);
+      setLoading(false);
+    }, 1000);
+    enqueueSnackbar('creation ok ', { variant: 'warning' });
+  }
   return (
     <Dialog
       className={classes.root}
@@ -137,7 +247,7 @@ function BankModal(props) {
         <Grid
           container
           justifyContent="center"
-          style={{ height: '45em', minWidth: '30em' }}
+          style={{ height: '40em', minWidth: '45em' }}
         >
           <Grid item xs={10}>
             <Grid container direction="row" className={classes.mainHeader}>
@@ -156,57 +266,135 @@ function BankModal(props) {
                 <>
                   <Grid xs={12}>
                     <h3>information bank : </h3>
-                    <Grid style={{ paddingTop: '2em' }}>
+                    <Grid style={{ paddingTop: '1em' }}>
                       <TextField
-                        style={{ width: '250px', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="text"
-                        label="bank name"
+                        label="Bank name"
+                        required
                         variant="outlined"
                         value={nameBank}
+                        helperText={
+                          errorBankMessages.bankname !== '' &&
+                          errorBankMessages.bankname
+                        }
+                        error={errorBankMessages.bankname !== ''}
                         onChange={(e) => setNameBank(e.target.value)}
+                        onBlur={(e) => {
+                          handleRequired(
+                            e.currentTarget.value,
+                            'bankname',
+                            'bank name'
+                          );
+                        }}
                       />
                       <TextField
-                        style={{ width: '25Opx', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="email"
+                        required
                         label="email"
                         variant="outlined"
+                        error={errorBankMessages.email !== ''}
+                        helperText={
+                          errorBankMessages.email !== '' &&
+                          errorBankMessages.email
+                        }
                         value={emailBank}
                         onChange={(e) => setEmailBank(e.target.value)}
+                        onBlur={async (e) => {
+                          handleRequired(
+                            e.currentTarget.value,
+                            'email',
+                            'Email'
+                          );
+                          if (!emailIsValid(e.currentTarget.value)) {
+                            setErrorMessages((current) => {
+                              return {
+                                ...current,
+                                email: 'format email incorrect',
+                              };
+                            });
+                          }
+                        }}
                       />
                       <TextField
-                        style={{ width: '250px', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="number"
                         label="nombre employer"
                         variant="outlined"
                         value={numberEmploy}
+                        required
+                        error={errorBankMessages.nbemploy !== ''}
+                        helperText={
+                          errorBankMessages.nbemploy !== '' &&
+                          errorBankMessages.nbemploy
+                        }
                         onChange={(e) => setNumberEmploy(e.target.value)}
+                        onBlur={(e) => {
+                          handleRequired(
+                            e.currentTarget.value,
+                            'nbemploy',
+                            "nombre d'employer"
+                          );
+                        }}
                       />
                     </Grid>
                   </Grid>
                   <Grid style={{ paddingTop: '1.5em' }}>
                     <TextField
-                      style={{ width: '250px', margin: '3px' }}
+                      style={{ width: '243px', margin: '2px' }}
                       type="text"
                       label="ville"
                       variant="outlined"
                       value={cityBank}
                       onChange={(e) => setCityBank(e.target.value)}
+                      error={errorBankMessages.ville !== ''}
+                      helperText={
+                        errorBankMessages.ville !== '' &&
+                        errorBankMessages.ville
+                      }
+                      required
+                      onBlur={(e) => {
+                        handleRequired(e.currentTarget.value, 'ville', 'ville');
+                      }}
                     />
                     <TextField
-                      style={{ width: '250px', margin: '3px' }}
+                      style={{ width: '243px', margin: '2px' }}
                       type="text"
                       label="pays"
                       variant="outlined"
                       value={countryBank}
                       onChange={(e) => setCountryBank(e.target.value)}
+                      error={errorBankMessages.pays !== ''}
+                      helperText={
+                        errorBankMessages.pays !== '' && errorBankMessages.pays
+                      }
+                      required
+                      fullWidth
+                      onBlur={(e) => {
+                        handleRequired(e.currentTarget.value, 'pays', 'pays');
+                      }}
                     />
                     <TextField
-                      style={{ width: '25Opx', margin: '3px' }}
+                      style={{ width: '243px', margin: '2px' }}
                       type="text"
-                      label="addresse"
+                      label="adresse"
                       variant="outlined"
                       value={addressBank}
                       onChange={(e) => setAddressBank(e.target.value)}
+                      error={errorBankMessages.adress !== ''}
+                      helperText={
+                        errorBankMessages.adress !== '' &&
+                        errorBankMessages.adress
+                      }
+                      required
+                      onBlur={(e) => {
+                        handleRequired(
+                          e.currentTarget.value,
+                          'adress',
+                          'adresse'
+                        );
+                      }}
                     />
                   </Grid>
                 </>
@@ -218,28 +406,63 @@ function BankModal(props) {
                     <h3>information directeur : </h3>
                     <Grid style={{ paddingTop: '2em' }}>
                       <TextField
-                        style={{ width: '250px', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="text"
                         label="nom"
                         variant="outlined"
                         value={directeurName}
                         onChange={(e) => setDirecteurName(e.target.value)}
+                        error={errorBankMessages.name !== ''}
+                        helperText={
+                          errorBankMessages.name !== '' &&
+                          errorBankMessages.name
+                        }
+                        required
+                        onBlur={(e) => {
+                          handleRequired(e.currentTarget.value, 'name', 'nom');
+                        }}
                       />
                       <TextField
-                        style={{ width: '25Opx', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="text"
                         label="prenom"
                         variant="outlined"
                         value={directeurLastName}
                         onChange={(e) => setDirecteurLastName(e.target.value)}
+                        error={errorBankMessages.lastName !== ''}
+                        helperText={
+                          errorBankMessages.lastName !== '' &&
+                          errorBankMessages.lastName
+                        }
+                        required
+                        onBlur={(e) => {
+                          handleRequired(
+                            e.currentTarget.value,
+                            'lastName',
+                            'prenom'
+                          );
+                        }}
                       />
                       <TextField
-                        style={{ width: '250px', margin: '3px' }}
+                        style={{ width: '243px', margin: '2px' }}
                         type="email"
                         label="email"
                         variant="outlined"
                         value={directeurEmail}
                         onChange={(e) => setDirecteurEmail(e.target.value)}
+                        error={errorBankMessages.emailPro !== ''}
+                        helperText={
+                          errorBankMessages.emailPro !== '' &&
+                          errorBankMessages.emailPro
+                        }
+                        required
+                        onBlur={(e) => {
+                          handleRequired(
+                            e.currentTarget.value,
+                            'emailPro',
+                            'email'
+                          );
+                        }}
                       />
                     </Grid>
                   </Grid>
@@ -352,16 +575,31 @@ function BankModal(props) {
                 onClick={() => {
                   setActiveStep(0);
                   setConfirme(false);
-                  setTimeout(() => {
-                    setOpen(false);
-                  }, 1000);
-                  enqueueSnackbar('creation ok ', { variant: 'warning' });
+                  setLoading(true);
+                  sendData();
                 }}
               >
                 Continuer
               </Button>
             </DialogActions>
           </Dialog>
+        </div>
+        <div>
+          <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={isloading}
+          >
+            <p
+              style={{
+                color: 'white',
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                fontSize: '1.5em',
+              }}
+            >
+              un instant...
+            </p>
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </div>
       </DialogContent>
     </Dialog>
