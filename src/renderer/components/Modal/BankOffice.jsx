@@ -26,10 +26,13 @@ import MuiAlert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import bankHelper from '../../helpers/BankHelper';
+import { useRecoilState } from 'recoil';
 const steps = ['information bank', 'information directeur', 'Recapitulatif'];
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction="left" ref={ref} {...props} />;
 });
+
 const styles = (theme) => ({
   root: {
     flexGrow: 1,
@@ -76,6 +79,7 @@ function BankModal(props) {
   const [directeurLastName, setDirecteurLastName] = useState('');
   const [confirme, setConfirme] = React.useState(false);
   const [isloading, setLoading] = useState(false);
+  const [, setBanks] = useRecoilState(bankHelper.banksAtom);
   const handleClickOpen = () => {
     setConfirme(true);
   };
@@ -222,15 +226,42 @@ function BankModal(props) {
     setActiveStep(0);
   };
 
-  const sendData =()=>{
-
-
-    setTimeout(() => {
-      setOpen(false);
-      setLoading(false);
-    }, 1000);
-    enqueueSnackbar('creation ok ', { variant: 'warning' });
-  }
+  const sendData = () => {
+    let data = {
+      officeName: nameBank,
+      country: countryBank,
+      address: addressBank,
+      city: cityBank,
+      number_employees: Number(numberEmploy),
+      email: emailBank,
+      user: {
+        name: directeurName,
+        forename: directeurLastName,
+        email: directeurEmail,
+      },
+    };
+    bankHelper.service
+      .create(data)
+      .then(({ data }) => {
+        console.log(res);
+        enqueueSnackbar('création de la bank prise en compte', {
+          variant: 'success',
+        });
+        setBanks((current) => [...current, data.bank]);
+        setTimeout(() => {
+          setOpen(false);
+          setLoading(false);
+        }, 1000);
+      })
+      .catch((error) => {
+        enqueueSnackbar('la creation de la bank a echoué ', {
+          variant: 'error',
+        });
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+      });
+  };
   return (
     <Dialog
       className={classes.root}

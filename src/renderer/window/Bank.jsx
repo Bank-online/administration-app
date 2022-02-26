@@ -102,7 +102,7 @@ export default function Bank(props) {
         container
         style={{
           marginTop: '1.6em',
-
+          overflow: 'auto',
           maxHeight: '65vh',
         }}
       >
