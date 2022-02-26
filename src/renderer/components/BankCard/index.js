@@ -12,28 +12,28 @@ export default function BankCard(props) {
                    sx={{
                        p: 2,
                        m: 1,
-                       width: '100%',
+                       width: '25em',
                        borderRadius: '10px',
                    }}>
 
                 <h3 style={{
                     textAlign: 'center',
                 }}>
-                     nom de la banque 
+                     {props.bankName}
                 </h3>
 
                 <hr/>
 
                 <div>
-                    <p style={{
+                    {/* <p style={{
                         display: 'flex',
                         alignItems: 'center',
-                    }}><EmailIcon sx={{pr: 1}} /> email@test.com</p>
+                    }}><EmailIcon sx={{pr: 1}} /> {props.email}</p> */}
 
                     <p style={{
                         display: 'flex',
                         alignItems: 'center',
-                    }}><LocationCityIcon sx={{pr: 1}} /> ville</p>
+                    }}><LocationCityIcon sx={{pr: 1}} /> {props.ville}</p>
 
                 </div>
 

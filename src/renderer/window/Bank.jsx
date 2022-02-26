@@ -13,14 +13,28 @@ import BankOffice from 'renderer/components/Modal/BankOffice';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
-
+import BankHelper from '../helpers/BankHelper';
+import BankCard from 'renderer/components/BankCard';
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 export default function Bank(props) {
   const [open, setOpen] = useState(false);
   const [openNotif, setOpenNotif] = useState(false);
-
+  const [banks, setBanks] = useRecoilState(BankHelper.banksAtom);
+  const content = () => {
+    banks.map((el) => {
+      console.log(el);
+    });
+  };
+  useEffect(() => {
+    BankHelper.service
+      .getAll()
+      .then(({ data }) => {
+        setBanks(data.data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
   return (
     <Box>
       <Stack spacing={2} sx={{ width: '100%' }}>
@@ -85,15 +99,25 @@ export default function Bank(props) {
       <BankOffice open={open} setOpen={setOpen} setOpenNotif={setOpenNotif} />
       <Grid
         spacing={3}
-        justifyContent="center"
         container
         style={{
           marginTop: '1.6em',
-          overflow: 'auto',
+
           maxHeight: '65vh',
-          msOverflowStyle: 'hidden',
         }}
-      ></Grid>
+      >
+        {banks.map((bank, index) => {
+          return (
+            <Grid>
+              <BankCard
+                bankName={bank.officeName}
+                ville={bank.city}
+                email={props.email}
+              />
+            </Grid>
+          );
+        })}
+      </Grid>
     </Box>
   );
 }

@@ -1,6 +1,7 @@
 import { atom } from 'recoil';
 import { instance } from '../apiHelper';
 
+/**contient la data de l'utilisateur logger */
 const userAtom = atom({
   key: 'userState',
   default: undefined,
@@ -23,6 +24,12 @@ const service = {
       password,
     });
   },
+  /**
+   * cette fonction nous permet de recuperer la data liee a un utilisateur
+   * @param {*} uuid uui de user qu'on souhaite recuperer la data
+   * @param {*} token  token user
+   * @returns
+   */
   getInfoUser: (uuid, token) => {
     return instance.get(`/user/get-user/${uuid}`, {
       headers: { Authorization: `Bearer ${token}` },

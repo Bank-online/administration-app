@@ -10,7 +10,7 @@ import Slide from '@material-ui/core/Slide';
 export default function App() {
   const [user, setUser] = useRecoilState(userHelper.userAtom);
   const [isLogin] = useRecoilState(userHelper.isLoginAtom);
-  if (localStorage.getItem('token')) {
+  if (localStorage.getItem('token') && !user) {
     userHelper.service
       .getInfoUser(
         jwtDecode(localStorage.getItem('token')).uuid,
