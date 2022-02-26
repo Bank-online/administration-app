@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { withStyles, MenuItem } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -17,8 +17,17 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import { useSnackbar } from 'notistack';
 const steps = ['information bank', 'information directeur', 'Recapitulatif'];
-
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 const styles = (theme) => ({
   root: {
     flexGrow: 1,
@@ -42,7 +51,7 @@ const styles = (theme) => ({
   },
   mainContent: {
     padding: 20,
-    heigthmin : "100em"
+    heigthmin: '100em',
   },
   secondaryContainer: {
     padding: '20px 25px',
@@ -52,9 +61,27 @@ const styles = (theme) => ({
 
 function BankModal(props) {
   const { classes, open, setOpen } = props;
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [skipped, setSkipped] = React.useState(new Set());
+  const [activeStep, setActiveStep] = useState(0);
+  const [skipped, setSkipped] = useState(new Set());
+  const [nameBank, setNameBank] = useState('');
+  const [countryBank, setCountryBank] = useState('');
+  const [addressBank, setAddressBank] = useState('');
+  const [cityBank, setCityBank] = useState('');
+  const [numberEmploy, setNumberEmploy] = useState('');
+  const [emailBank, setEmailBank] = useState('');
+  const [adressBank, setAdressBank] = useState('');
+  const [directeurName, setDirecteurName] = useState('');
+  const [directeurEmail, setDirecteurEmail] = useState('');
+  const [directeurLastName, setDirecteurLastName] = useState('');
+  const [confirme, setConfirme] = React.useState(false);
 
+  const handleClickOpen = () => {
+    setConfirme(true);
+  };
+
+  const handleClose = () => {
+    setConfirme(false);
+  };
   const isStepOptional = (step) => {
     return step === 1;
   };
@@ -65,8 +92,6 @@ function BankModal(props) {
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
-      setOpen(false);
-      setActiveStep(-1);
     }
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
@@ -83,11 +108,7 @@ function BankModal(props) {
   };
 
   const handleSkip = () => {
-    if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
-      throw new Error("You can't skip a step that isn't optional.");
-    }
+  
 
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setSkipped((prevSkipped) => {
@@ -96,16 +117,16 @@ function BankModal(props) {
       return newSkipped;
     });
   };
-
+  const { enqueueSnackbar } = useSnackbar();
   const handleReset = () => {
     setActiveStep(0);
   };
   return (
     <Dialog
       className={classes.root}
-      fullWidth
       maxWidth="md"
-      style={{ heigth: '80vh' }}
+      maxHeight="md"
+      minWidth="md"
       open={open}
       onClose={() => {
         handleReset();
@@ -113,7 +134,11 @@ function BankModal(props) {
       }}
     >
       <DialogContent className={classes.padding}>
-        <Grid container>
+        <Grid
+          container
+          justifyContent="center"
+          style={{ height: '45em', minWidth: '30em' }}
+        >
           <Grid item xs={10}>
             <Grid container direction="row" className={classes.mainHeader}>
               <Grid item xs={8}>
@@ -122,32 +147,39 @@ function BankModal(props) {
                 </Typography>
               </Grid>
             </Grid>
-            <Grid container direction="row" className={classes.mainContent}>
+            <Grid
+              container
+              className={classes.mainContent}
+              style={{ width: 'md' }}
+            >
               {activeStep === 0 && (
                 <>
                   <Grid xs={12}>
-                    <h3>information bank : {activeStep} </h3>
+                    <h3>information bank : </h3>
                     <Grid style={{ paddingTop: '2em' }}>
                       <TextField
                         style={{ width: '250px', margin: '3px' }}
                         type="text"
                         label="bank name"
                         variant="outlined"
-                        onChange={}
+                        value={nameBank}
+                        onChange={(e) => setNameBank(e.target.value)}
                       />
                       <TextField
                         style={{ width: '25Opx', margin: '3px' }}
                         type="email"
                         label="email"
                         variant="outlined"
-                        onChange={}
+                        value={emailBank}
+                        onChange={(e) => setEmailBank(e.target.value)}
                       />
                       <TextField
                         style={{ width: '250px', margin: '3px' }}
                         type="number"
                         label="nombre employer"
                         variant="outlined"
-                        onChange={}
+                        value={numberEmploy}
+                        onChange={(e) => setNumberEmploy(e.target.value)}
                       />
                     </Grid>
                   </Grid>
@@ -157,21 +189,24 @@ function BankModal(props) {
                       type="text"
                       label="ville"
                       variant="outlined"
-                      onChange={}
+                      value={cityBank}
+                      onChange={(e) => setCityBank(e.target.value)}
                     />
                     <TextField
                       style={{ width: '250px', margin: '3px' }}
                       type="text"
                       label="pays"
                       variant="outlined"
-                      onChange={}
+                      value={countryBank}
+                      onChange={(e) => setCountryBank(e.target.value)}
                     />
                     <TextField
                       style={{ width: '25Opx', margin: '3px' }}
                       type="text"
                       label="addresse"
                       variant="outlined"
-                      onChange={}
+                      value={addressBank}
+                      onChange={(e) => setAddressBank(e.target.value)}
                     />
                   </Grid>
                 </>
@@ -180,33 +215,61 @@ function BankModal(props) {
               {activeStep === 1 && (
                 <>
                   <Grid xs={12}>
-                    <h3>information directeur : {activeStep} </h3>
+                    <h3>information directeur : </h3>
                     <Grid style={{ paddingTop: '2em' }}>
                       <TextField
                         style={{ width: '250px', margin: '3px' }}
                         type="text"
                         label="nom"
                         variant="outlined"
+                        value={directeurName}
+                        onChange={(e) => setDirecteurName(e.target.value)}
                       />
                       <TextField
                         style={{ width: '25Opx', margin: '3px' }}
                         type="text"
                         label="prenom"
                         variant="outlined"
+                        value={directeurLastName}
+                        onChange={(e) => setDirecteurLastName(e.target.value)}
                       />
                       <TextField
                         style={{ width: '250px', margin: '3px' }}
                         type="email"
                         label="email"
                         variant="outlined"
+                        value={directeurEmail}
+                        onChange={(e) => setDirecteurEmail(e.target.value)}
                       />
                     </Grid>
                   </Grid>
-          
                 </>
               )}
 
-              <React.Fragment>
+              {activeStep === 2 && (
+                <Grid container xs={12} direction="row" justifyContent="center">
+                  <Grid xs={5}>
+                    <h3>information Bank : </h3>
+                    <div style={{ fontSize: '1.2em' }}>
+                      <p>nom de la bank : {nameBank}</p>
+                      <p>pays :{countryBank} </p>
+                      <p>ville : {cityBank}</p>
+                      <p>addresse : {addressBank}</p>
+                      <p>email : {emailBank}</p>
+                    </div>
+                  </Grid>
+                  <Grid xs={5}>
+                    <h3>information directeur : </h3>
+                    <div style={{ fontSize: '1.2em' }}>
+                      <p>nom : {directeurName}</p>
+                      <p>prenom :{directeurLastName} </p>
+                      <p>email : {directeurEmail}</p>
+                    </div>
+                  </Grid>
+                </Grid>
+              )}
+
+              <Grid xs={12}>
                 <Typography sx={{ mt: 2, mb: 1 }}></Typography>
                 <Box
                   xs={10}
@@ -214,13 +277,18 @@ function BankModal(props) {
                 >
                   <Button
                     variant="contained"
-                    onClick={handleNext}
+                    onClick={() => {
+                      if (activeStep === steps.length - 1) {
+                        return handleClickOpen();
+                      }
+                      handleNext();
+                    }}
                     style={{ marginLeft: '20em' }}
                   >
                     {activeStep === steps.length - 1 ? 'Valider' : 'Suivant'}
                   </Button>
                 </Box>
-              </React.Fragment>
+              </Grid>
             </Grid>
           </Grid>
           <Grid item xs={2} className={classes.secondaryContainer}>
@@ -254,6 +322,47 @@ function BankModal(props) {
             </Grid>
           </Grid>
         </Grid>
+        <div>
+          <Dialog
+            open={confirme}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={handleClose}
+            aria-describedby="alert-dialog-slide-description"
+          >
+            <DialogTitle>
+              {
+                'vous etes sur le  point de cree une bank etes vous sur de continuer?'
+              }
+            </DialogTitle>
+
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setActiveStep(0);
+                  setConfirme(false);
+                  setTimeout(() => {
+                    setOpen(false);
+                  }, 1000);
+                }}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={() => {
+                  setActiveStep(0);
+                  setConfirme(false);
+                  setTimeout(() => {
+                    setOpen(false);
+                  }, 1000);
+                  enqueueSnackbar('creation ok ', { variant: 'warning' });
+                }}
+              >
+                Continuer
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -5,7 +5,8 @@ import Layout from './components/Layout';
 import { useRecoilState } from 'recoil';
 import userHelper from './helpers/UserHelper';
 import jwtDecode from 'jwt-decode';
-
+import { SnackbarProvider } from 'notistack';
+import Slide from '@material-ui/core/Slide';
 export default function App() {
   const [user, setUser] = useRecoilState(userHelper.userAtom);
   const [isLogin] = useRecoilState(userHelper.isLoginAtom);
@@ -25,9 +26,18 @@ export default function App() {
 
   return (
     <>
-      <Layout>
-        <BankRouter />
-      </Layout>
+      <SnackbarProvider
+        maxSnack={5}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        TransitionComponent={Slide}
+      >
+        <Layout>
+          <BankRouter />
+        </Layout>
+      </SnackbarProvider>
     </>
   );
 }
