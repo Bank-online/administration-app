@@ -15,9 +15,22 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import BankHelper from '../helpers/BankHelper';
 import BankCard from 'renderer/components/BankCard';
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import AddBank from '@mui/icons-material/AddBusinessOutlined';
+import IconButton from '@mui/material/IconButton';
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import { fontSize } from '@mui/system';
+const BootstrapTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} placement="top" style={{margin:0,fontSize:"1.7em"}}/>
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
+}));
 export default function Bank(props) {
   const [open, setOpen] = useState(false);
   const [openNotif, setOpenNotif] = useState(false);
@@ -37,21 +50,6 @@ export default function Bank(props) {
   }, []);
   return (
     <Box>
-      <Stack spacing={2} sx={{ width: '100%' }}>
-        <Snackbar
-          open={openNotif}
-          autoHideDuration={6000}
-          onClose={() => setOpenNotif(false)}
-        >
-          <Alert
-            onClose={() => setOpenNotif(false)}
-            severity="success"
-            sx={{ width: '100%' }}
-          >
-            creation bank prise en compte
-          </Alert>
-        </Snackbar>
-      </Stack>
       <div
         style={{
           display: 'flex',
@@ -64,14 +62,18 @@ export default function Bank(props) {
           <h1>Liste des Bank</h1>
         </div>
         <div>
-          <Button
-            variant={'outlined'}
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Créé une nouvelle Bank
-          </Button>
+          <BootstrapTooltip title="cree une nouvelle bank">
+            <IconButton
+              color="primary"
+              aria-label="upload picture"
+              component="span"
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              <AddBank style={{ fontSize: '1.4em' }} />
+            </IconButton>
+          </BootstrapTooltip>
         </div>
       </div>
       <Box>
@@ -96,7 +98,7 @@ export default function Bank(props) {
           </div>
         </div>
       </Box>
-      <BankOffice open={open} setOpen={setOpen} setOpenNotif={setOpenNotif} />
+      <BankOffice open={open} setOpen={setOpen} />
       <Grid
         spacing={3}
         container

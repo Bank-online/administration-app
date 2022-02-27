@@ -177,7 +177,7 @@ function BankModal(props) {
       handleRequired(countryBank, 'pays', 'pays');
       handleRequired(addressBank, 'adress', 'adresse');
       handleRequired(numberEmploy, 'nbemploy', 'nombre employer');
-      handleRequired(cityBank, 'ville', 'viller');
+      handleRequired(cityBank, 'ville', 'ville');
       if (!emailIsValid(emailBank)) {
         setErrorMessages((current) => {
           return {
@@ -243,7 +243,7 @@ function BankModal(props) {
     bankHelper.service
       .create(data)
       .then(({ data }) => {
-        console.log(res);
+       
         enqueueSnackbar('création de la bank prise en compte', {
           variant: 'success',
         });
@@ -254,6 +254,7 @@ function BankModal(props) {
         }, 1000);
       })
       .catch((error) => {
+         console.log(error)
         enqueueSnackbar('la creation de la bank a echoué ', {
           variant: 'error',
         });
