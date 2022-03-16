@@ -9,6 +9,7 @@ import {
   GridToolbarContainer,
   GridToolbarDensitySelector,
 } from '@mui/x-data-grid';
+import SignatureCanvas from 'react-signature-canvas';
 import BankOffice from 'renderer/components/Modal/BankOffice';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
@@ -22,7 +23,13 @@ import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
 const BootstrapTooltip = styled(({ className, ...props }) => (
-  <Tooltip {...props} arrow classes={{ popper: className }} placement="top" style={{margin:0,fontSize:"1.7em"}}/>
+  <Tooltip
+    {...props}
+    arrow
+    classes={{ popper: className }}
+    placement="top"
+    style={{ margin: 0, fontSize: '1.7em' }}
+  />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.arrow}`]: {
     color: theme.palette.common.black,
@@ -108,6 +115,11 @@ export default function Bank(props) {
           maxHeight: '65vh',
         }}
       >
+        <SignatureCanvas
+          penColor="green"
+          canvasProps={{ width: 500, height: 200, className: 'sigCanvas' }}
+        />
+
         {banks.map((bank, index) => {
           return (
             <Grid>

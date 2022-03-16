@@ -13,9 +13,11 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import userHelper from '../helpers/UserHelper';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
+import { useSnackbar } from 'notistack';
 import jwtDecode from 'jwt-decode';
 
 export default function Login(props) {
+  const { enqueueSnackbar } = useSnackbar();
   const [, setUser] = useRecoilState(userHelper.userAtom);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +41,9 @@ export default function Login(props) {
         localStorage.removeItem('token');
         console.error(err);
         setLoading(false);
+        enqueueSnackbar("le mot de passe ou l'identifant et incorrect", {
+          variant: 'error',
+        });
       });
   };
 

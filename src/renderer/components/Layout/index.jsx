@@ -20,6 +20,8 @@ import userHelper from '../../helpers/UserHelper';
 import Power from '@material-ui/icons/PowerSettingsNew';
 import { PowerInput } from '@material-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import { paperClasses } from '@mui/material';
+import { Paper } from '@material-ui/core';
 const drawerWidth = 250;
 
 const styles = (theme) => ({
@@ -131,7 +133,7 @@ const Dashboard = (props) => {
               className={classes.title}
               style={{ paddingLeft: '4em' }}
             >
-              🏦 Bank-online
+              🏦 Riale-online
             </Typography>
           )}
 
@@ -193,7 +195,11 @@ const Dashboard = (props) => {
         </Drawer>
       )}
 
-      <main className={classes.content}>{props.children}</main>
+      <main className={classes.content}>
+        <Paper style={{ height: '80vh', position: 'fixe' }}>
+          {props.children}
+        </Paper>
+      </main>
     </div>
   );
 };
