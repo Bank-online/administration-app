@@ -10,7 +10,7 @@ import {
   GridToolbarDensitySelector,
 } from '@mui/x-data-grid';
 import SignatureCanvas from 'react-signature-canvas';
-import BankOffice from 'renderer/components/Modal/BankOffice';
+import BankOffice from 'renderer/components/Modal/UserModal';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';

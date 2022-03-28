@@ -157,7 +157,7 @@ const Dashboard = (props) => {
                 noWrap
                 className={classes.title}
               >
-                🏦 Bank-online
+                🏦 Riale-online
               </Typography>
               <IconButton
                 color="inherit"
