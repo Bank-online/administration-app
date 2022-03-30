@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router';
 import { Avatar, Box, Button, Grid, Paper, TextField } from '@mui/material';
 import AccountIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
@@ -16,6 +16,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import CardAccount from '../components/CardAccount';
+import AccountControlleur from 'renderer/components/Modal/UserModal/AcountControlleur';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -33,11 +34,19 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
   },
 }));
 export default function InfoUser(props) {
+  const [openControlleur, setOpenControlleur] = useState(false);
   const { uuid } = useParams();
   const [enterprise, setEnterprise] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  
+  const handleOpenControlleur = () => {
+    setOpenControlleur(true);
+  };
 
+  const handleCloseControlleur = () => {
+    setOpenControlleur(false);
+  };
   const handleOpen = () => {
     setOpen(true);
   };
@@ -69,7 +78,7 @@ export default function InfoUser(props) {
         </div>
         <div>
           <BootstrapTooltip title="controlleur compte ">
-            <IconButton color="primary" size={'6em'}>
+            <IconButton color="primary" size={'6em'} onClick={handleOpenControlleur}>
               <AppSettingsAltIcon />
             </IconButton>
           </BootstrapTooltip>
@@ -111,7 +120,7 @@ export default function InfoUser(props) {
           <h2>Informations sur le client </h2>
           <div>
             <BootstrapTooltip title="modifier les info utilisateur">
-              <IconButton color="primary" size={'6em'}>
+              <IconButton color="primary" size={'6em'} >
                 <EditOutlinedIcon />
               </IconButton>
             </BootstrapTooltip>
@@ -124,7 +133,7 @@ export default function InfoUser(props) {
             justifyContent: 'space-evenly',
           }}
         >
-            <div>
+          <div>
             <div>
               <h3>Information génerale</h3>
               <p
@@ -201,7 +210,6 @@ export default function InfoUser(props) {
             </div>
             <div>{/*content*/}</div>
           </div>
-        
         </div>
       </Paper>
       <Paper
@@ -238,6 +246,10 @@ export default function InfoUser(props) {
         <hr />
         <CardAccount style={{ width: '23em' }} />
       </Paper>
+      <AccountControlleur
+    openControlleur={openControlleur}
+    setOpenControlleur={setOpenControlleur}
+  />;
 
       {/* <Paper
         elevation={2}
