@@ -1,5 +1,5 @@
 import { atom } from 'recoil';
-import { instance } from '../apiHelper';
+import { instance, token } from '../apiHelper';
 
 /**contient la data de l'utilisateur logger */
 const userAtom = atom({
@@ -10,6 +10,12 @@ const userAtom = atom({
 const isLoginAtom = atom({
   key: 'isLogin',
   default: false,
+});
+
+/**contient l'ensemble des utilisateur disponible */
+const users = atom({
+  key: 'allUsers',
+  default: [],
 });
 
 const service = {
@@ -35,11 +41,18 @@ const service = {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
+  getAll: () => {
+    return instance.get(`/user`, token);
+  },
+};
+const Atom = {
+  users,
 };
 const toExport = {
   isLoginAtom,
   userAtom,
   service,
+  Atom,
 };
 
 export default toExport;
