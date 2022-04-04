@@ -36,10 +36,8 @@ const service = {
    * @param {*} token  token user
    * @returns
    */
-  getInfoUser: (uuid, token) => {
-    return instance.get(`/user/get-user/${uuid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getInfoUser: (uuid, tokKen) => {
+    return instance.get(`/user/get-user/${uuid}`, token);
   },
   getAll: () => {
     return instance.get(`/user`, token);

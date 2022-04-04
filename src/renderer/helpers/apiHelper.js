@@ -10,5 +10,6 @@ export const instance = axios.create({
   headers: {
     'content-type': 'application/json',
     apikey: '243716942224322W4myehpg6d66',
+    Authorization: `Bearer ${localStorage.getItem('token')}`
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Avatar, Box, Button, Grid, Paper, TextField } from '@mui/material';
 import AccountIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
@@ -17,6 +17,8 @@ import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import CardAccount from '../components/CardAccount';
 import AccountControlleur from 'renderer/components/Modal/UserModal/AcountControlleur';
+import UserHelper from '../helpers/UserHelper'
+import { token } from 'renderer/helpers/apiHelper';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -39,7 +41,15 @@ export default function InfoUser(props) {
   const [enterprise, setEnterprise] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
-  
+  React.useEffect(() => {
+    
+    UserHelper.service.getInfoUser(uuid,token)
+    .then((res)=>{
+      console.log(res);
+    })
+    .catch((e)=>console.log(e))
+  }, []);
+ 
   const handleOpenControlleur = () => {
     setOpenControlleur(true);
   };
@@ -60,9 +70,7 @@ export default function InfoUser(props) {
     }
   };
 
-  React.useEffect(() => {
-    handleOpen();
-  }, []);
+
 
   return (
     <Box>

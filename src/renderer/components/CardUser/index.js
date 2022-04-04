@@ -28,16 +28,7 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
 }));
 export default function CardUser({ user }) {
   const navigate = useNavigate();
-  useEffect(() => {
-    UserHelper.service
-      .getAll()
-      .then(({data}) => {
-        setUsers(data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, []);
+
   return (
     <Paper
       elevation={3}
