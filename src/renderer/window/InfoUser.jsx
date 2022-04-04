@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Avatar, Box, Button, Grid, Paper, TextField } from '@mui/material';
 import AccountIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
@@ -17,7 +17,7 @@ import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import CardAccount from '../components/CardAccount';
 import AccountControlleur from 'renderer/components/Modal/UserModal/AcountControlleur';
-import UserHelper from '../helpers/UserHelper'
+import UserHelper from '../helpers/UserHelper';
 import { token } from 'renderer/helpers/apiHelper';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
@@ -38,18 +38,20 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
 export default function InfoUser(props) {
   const [openControlleur, setOpenControlleur] = useState(false);
   const { uuid } = useParams();
+  const [user,setUser] = useState("")
   const [enterprise, setEnterprise] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   React.useEffect(() => {
-    
-    UserHelper.service.getInfoUser(uuid,token)
-    .then((res)=>{
-      console.log(res);
-    })
-    .catch((e)=>console.log(e))
+    UserHelper.service
+      .getInfoUser(uuid, token)
+      .then(({data}) => {
+        console.log(data)
+        setUser(data)
+      })
+      .catch((e) => console.log(e));
   }, []);
- 
+
   const handleOpenControlleur = () => {
     setOpenControlleur(true);
   };
@@ -70,8 +72,6 @@ export default function InfoUser(props) {
     }
   };
 
-
-
   return (
     <Box>
       <div
@@ -82,11 +82,15 @@ export default function InfoUser(props) {
         }}
       >
         <div>
-          <h1>mohamadi msa abdou</h1>
+          <h1>{user.name+" "+user.forename}</h1>
         </div>
         <div>
           <BootstrapTooltip title="controlleur compte ">
-            <IconButton color="primary" size={'6em'} onClick={handleOpenControlleur}>
+            <IconButton
+              color="primary"
+              size={'6em'}
+              onClick={handleOpenControlleur}
+            >
               <AppSettingsAltIcon />
             </IconButton>
           </BootstrapTooltip>
@@ -108,7 +112,6 @@ export default function InfoUser(props) {
           }}
         />
       </div>
-
       <Paper
         elevation={2}
         sx={{
@@ -128,7 +131,7 @@ export default function InfoUser(props) {
           <h2>Informations sur le client </h2>
           <div>
             <BootstrapTooltip title="modifier les info utilisateur">
-              <IconButton color="primary" size={'6em'} >
+              <IconButton color="primary" size={'6em'}>
                 <EditOutlinedIcon />
               </IconButton>
             </BootstrapTooltip>
@@ -150,7 +153,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                nom : msa abdou
+                nom : {user.name}
               </p>
               <p
                 style={{
@@ -158,7 +161,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                prenom : mohamadi
+                prenom : {user.forename}
               </p>
               <p
                 style={{
@@ -166,7 +169,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                date naissance : 12/07/1998
+                date naissance : {user.birthday}
               </p>
             </div>
             <div>{/*content*/}</div>
@@ -182,7 +185,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                <HomeIcon sx={{ pr: 1 }} /> {'2& rue de engelbreit'}
+                <HomeIcon sx={{ pr: 1 }} /> {user.address}
               </p>
 
               <p
@@ -191,7 +194,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                <LocationCityIcon sx={{ pr: 1 }} /> {'strasbourg'} {67000}
+                <LocationCityIcon sx={{ pr: 1 }} /> {user.city} {user.zipCode}
               </p>
 
               <p
@@ -200,7 +203,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                <FlagIcon sx={{ pr: 1 }} /> {'france'}
+                <FlagIcon sx={{ pr: 1 }} /> {user.country}
               </p>
             </div>
           </div>
@@ -213,7 +216,7 @@ export default function InfoUser(props) {
                   alignItems: 'center',
                 }}
               >
-                <EmailIcon sx={{ pr: 1 }} /> {'petubrt@gmail.com'}
+                <EmailIcon sx={{ pr: 1 }} /> {user.email}
               </p>
             </div>
             <div>{/*content*/}</div>
@@ -255,10 +258,10 @@ export default function InfoUser(props) {
         <CardAccount style={{ width: '23em' }} />
       </Paper>
       <AccountControlleur
-    openControlleur={openControlleur}
-    setOpenControlleur={setOpenControlleur}
-  />;
-
+        openControlleur={openControlleur}
+        setOpenControlleur={setOpenControlleur}
+      />
+      ;
       {/* <Paper
         elevation={2}
         sx={{
