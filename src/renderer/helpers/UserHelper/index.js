@@ -36,11 +36,20 @@ const service = {
    * @param {*} token  token user
    * @returns
    */
-  getInfoUser: (uuid, tokKen) => {
-    return instance.get(`/user/get-user/${uuid}`, token);
+  getInfoUser: (uuid, tok =null) => {
+    return instance.get(
+      `/user/get-user/${uuid}`,
+      tok
+        ? {
+            headers: {
+              Authorization: `Bearer ${tok}`,
+            },
+          }
+        : token
+    );
   },
   getAll: () => {
-    return instance.get(`/user`, token);
+    return instance.get(`/user`);
   },
 };
 const Atom = {
