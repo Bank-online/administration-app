@@ -25,7 +25,10 @@ function Editor(props) {
         }}
         onBlur={(event, editor) => {
           //------this setter is to active the update of where you modified the textarea --------//
-          props.setDataEditor(data);
+          props.setStateAccount({
+            ...props.stateAccount,
+            ['comment'] : data
+          });
         }}
       />
     </Box>

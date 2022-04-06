@@ -19,6 +19,7 @@ import CardAccount from '../components/CardAccount';
 import AccountControlleur from 'renderer/components/Modal/UserModal/AcountControlleur';
 import UserHelper from '../helpers/UserHelper';
 import { token } from 'renderer/helpers/apiHelper';
+import Skeleton from '@mui/material/Skeleton';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -38,19 +39,20 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
 export default function InfoUser(props) {
   const [openControlleur, setOpenControlleur] = useState(false);
   const { uuid } = useParams();
-  const [user,setUser] = useState("")
-  const [enterprise, setEnterprise] = React.useState(null);
+  const [user, setUser] = useState(null);
   const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const navigate = useNavigate();
   React.useEffect(() => {
     UserHelper.service
-      .getInfoUser(uuid, token)
-      .then(({data}) => {
-        console.log(data)
-        setUser(data)
+      .getInfoUser(uuid)
+      .then(({ data }) => {
+        setUser(data);
+        setIsLoading(false);
       })
       .catch((e) => console.log(e));
-  }, []);
+  }, [uuid]);
 
   const handleOpenControlleur = () => {
     setOpenControlleur(true);
@@ -82,7 +84,11 @@ export default function InfoUser(props) {
         }}
       >
         <div>
-          <h1>{user.name+" "+user.forename}</h1>
+          {isLoading ? (
+            <Skeleton variant="text" width={100} />
+          ) : (
+            <h1>{user.name + ' ' + user.forename}</h1>
+          )}
         </div>
         <div>
           <BootstrapTooltip title="controlleur compte ">
@@ -147,77 +153,93 @@ export default function InfoUser(props) {
           <div>
             <div>
               <h3>Information génerale</h3>
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                nom : {user.name}
-              </p>
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                prenom : {user.forename}
-              </p>
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                date naissance : {user.birthday}
-              </p>
+              {isLoading ? (
+                <Skeleton variant="rectangular" width={210} height={118} />
+              ) : (
+                <>
+                  <p
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    nom : {user.name}
+                  </p>
+                  <p
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    prenom : {user.forename}
+                  </p>
+                  <p
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    date naissance : {user.birthday}
+                  </p>
+                </>
+              )}
             </div>
+
             <div>{/*content*/}</div>
           </div>
           <div>
             <div>
               <h3>Information de facturation / domiciliation</h3>
             </div>
-            <div>
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <HomeIcon sx={{ pr: 1 }} /> {user.address}
-              </p>
+            {isLoading ? (
+              <Skeleton variant="rectangular" width={210} height={118} />
+            ) : (
+              <div>
+                <p
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <HomeIcon sx={{ pr: 1 }} /> {user.address}
+                </p>
 
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <LocationCityIcon sx={{ pr: 1 }} /> {user.city} {user.zipCode}
-              </p>
+                <p
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <LocationCityIcon sx={{ pr: 1 }} /> {user.city} {user.zipCode}
+                </p>
 
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <FlagIcon sx={{ pr: 1 }} /> {user.country}
-              </p>
-            </div>
+                <p
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FlagIcon sx={{ pr: 1 }} /> {user.country}
+                </p>
+              </div>
+            )}
           </div>
+
           <div>
             <div>
               <h3>Information de contact</h3>
-              <p
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <EmailIcon sx={{ pr: 1 }} /> {user.email}
-              </p>
+              {isLoading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <p
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <EmailIcon sx={{ pr: 1 }} /> {user.email}
+                </p>
+              )}
             </div>
             <div>{/*content*/}</div>
           </div>
@@ -257,10 +279,13 @@ export default function InfoUser(props) {
         <hr />
         <CardAccount style={{ width: '23em' }} />
       </Paper>
-      <AccountControlleur
-        openControlleur={openControlleur}
-        setOpenControlleur={setOpenControlleur}
-      />
+      {!isLoading && (
+        <AccountControlleur
+          openControlleur={openControlleur}
+          setOpenControlleur={setOpenControlleur}
+          infoUser={user}
+        />
+      )}
       ;
       {/* <Paper
         elevation={2}

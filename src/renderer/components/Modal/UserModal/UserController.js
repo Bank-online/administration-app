@@ -12,12 +12,12 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
-
-
+import UserHelper from '../../../helpers/UserHelper';
+import { useSnackbar } from 'notistack';
 export default function FormDialog(props) {
   const [open, setOpen] = React.useState(true);
-  const [value, setValue] = React.useState('desactiver');
-
+  const [value, setValue] = React.useState('disable');
+  const { enqueueSnackbar } = useSnackbar();
   const handleChange = (event) => {
     setValue(event.target.value);
   };
@@ -25,10 +25,23 @@ export default function FormDialog(props) {
     props.setStateAccount({
       ...props.stateAccount,
       ['state']: true,
+      ['status']: 'Activer',
+      ['comment']: '',
     });
     props.handleClose({ value: false, name: 'modalUserStatus' });
   };
 
+  const traductionStatus = (status) => {
+    if (status == 'suspend') {
+      return 'suspendus';
+    }
+    if (status == 'disable') {
+      return 'desactiver';
+    }
+    if (status == 'banish') {
+      return 'bannis';
+    }
+  };
   return (
     <Dialog open={props.open} onClose={handleCancel} clo>
       <DialogTitle>mise a jour du status de compte</DialogTitle>
@@ -45,17 +58,17 @@ export default function FormDialog(props) {
             onChange={handleChange}
           >
             <FormControlLabel
-              value="suspendre"
+              value="suspend"
               control={<Radio />}
               label="Suspendre"
             />
             <FormControlLabel
-              value="bannir"
+              value="banish"
               control={<Radio />}
               label="Bannir"
             />
             <FormControlLabel
-              value="desactiver"
+              value="disable"
               control={<Radio />}
               label="Désactiver"
             />
@@ -70,10 +83,27 @@ export default function FormDialog(props) {
       <DialogActions>
         <Button onClick={handleCancel}>annuler</Button>
         <Button
-          disabled={props.dataEditor.length < 30 ? true : false}
-          onClick={() =>
-            props.handleClose({ value: false, name: 'modalUserStatus' })
-          }
+          disabled={props.stateAccount.comment.length < 30 ? true : false}
+          onClick={() => {
+            UserHelper.service
+              .managementAccount(value, props.infoUser.uuid, props.dataEditor)
+              .then(({ data }) => {
+                enqueueSnackbar(data.message, {
+                  variant: 'success',
+                });
+                props.setStateAccount({
+                  ...props.stateAccount,
+                  ['state']: false,
+                  ['status']: traductionStatus(value),
+                });
+              })
+              .catch(() => {
+                enqueueSnackbar("une erreur c'est produite", {
+                  variant: 'error',
+                });
+              });
+            props.handleClose({ value: false, name: 'modalUserStatus' });
+          }}
         >
           valider
         </Button>

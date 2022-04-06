@@ -14,7 +14,6 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
-import * as React from 'react';
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import FormGroup from '@mui/material/FormGroup';
@@ -23,6 +22,8 @@ import Typography from '@mui/material/Typography';
 import ModalGestionAccount from './UserController';
 import { IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
+import UserHelpers from '../../../helpers/UserHelper';
+import { useSnackbar } from 'notistack';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -50,14 +51,50 @@ const HtmlTooltip = styled(({ className, ...props }) => (
     border: '1px solid #dadde9',
   },
 }));
+
 export default function AccountControlleur(props) {
+  const { enqueueSnackbar } = useSnackbar();
+  const statusAccount = () => {
+    let info = {};
+
+    if (!props.infoUser.isActive) {
+      info.status = 'Désactiver';
+      info.comment = props.infoUser.comment;
+      info.state = false;
+      return info;
+    } else if (props.infoUser.isSuspended) {
+      info.status = 'Suspendus';
+      info.comment = props.infoUser.comment;
+      info.state = false;
+      return info;
+    } else if (props.infoUser.deleted) {
+      info.status = 'Supprimer';
+      info.comment = props.infoUser.comment;
+      info.state = false;
+      return info;
+    } else if (props.infoUser.isBanned) {
+      info.status = 'Bannis';
+      info.comment = props.infoUser.comment;
+      info.state = false;
+      return info;
+    }
+    return (info = {
+      status: 'Activer',
+      comment: '',
+      state: true,
+    });
+  };
   const [stateAccount, setStateAccount] = React.useState({
-    state: true,
+    state: statusAccount().state,
+    comment: statusAccount().comment,
+    status: statusAccount().status,
   });
   const [modal, setModal] = React.useState({
     modalUserStatus: false,
   });
-  const [stateAccountComment, setStateAccountComment] = React.useState('');
+  const [stateAccountComment, setStateAccountComment] = React.useState(
+    statusAccount().comment
+  );
 
   const handleChangeStatus = (modale) => {
     setModal({
@@ -69,6 +106,7 @@ export default function AccountControlleur(props) {
     setStateAccount({
       ...stateAccount,
       [event.target.name]: event.target.checked,
+      ['status']: 'Activer',
     });
 
     if (!event.target.checked) {
@@ -76,6 +114,24 @@ export default function AccountControlleur(props) {
         value: !modal.modalUserStatus,
         name: 'modalUserStatus',
       });
+      setStateAccount({
+        ...stateAccount,
+        [event.target.name]: event.target.checked,
+        ['status'] : "Désactiver"
+      });
+    } else {
+      UserHelpers.service
+        .managementAccount('active', props.infoUser.uuid)
+        .then(({ data }) => {
+          enqueueSnackbar(data.message, {
+            variant: 'success',
+          });
+        })
+        .catch(() => {
+          enqueueSnackbar('une erreur est survenus ', {
+            variant: 'error',
+          });
+        });
     }
   };
   const handleClose = () => {
@@ -90,9 +146,9 @@ export default function AccountControlleur(props) {
         open={props.openControlleur}
         onClose={handleClose}
       >
-        <DialogTitle style={{ textAlign: 'center' ,flexDirection : "row"}} >
-        <div>controlleur utilisateur</div>
-        {/* <div style={{ float: 'right' }}>
+        <DialogTitle style={{ textAlign: 'center', flexDirection: 'row' }}>
+          <div>controlleur utilisateur</div>
+          {/* <div style={{ float: 'right' }}>
           <IconButton onClick={handleClose} color="secondary" style={{}}>
             <CloseIcon />
           </IconButton>
@@ -122,11 +178,11 @@ export default function AccountControlleur(props) {
                     title={
                       <React.Fragment>
                         <Typography color="inherit">
-                          compte désactiver
+                        Compte  {stateAccount.status}
                         </Typography>
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: stateAccountComment,
+                            __html: stateAccount.comment,
                           }}
                         />
                       </React.Fragment>
@@ -141,20 +197,21 @@ export default function AccountControlleur(props) {
                   </HtmlTooltip>
                 )
               }
-              label={stateAccount.state ? 'Active' : 'Désactiver'}
+              label={stateAccount.status}
             />
             <ModalGestionAccount
               open={modal.modalUserStatus}
               handleClose={handleChangeStatus}
               setStateAccount={setStateAccount}
               stateAccount={stateAccount}
-              dataEditor={stateAccountComment}
+              dataEditor={stateAccount.comment}
               setDataEditor={setStateAccountComment}
+              {...props}
             />
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>Fermer</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

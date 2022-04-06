@@ -36,7 +36,7 @@ const service = {
    * @param {*} token  token user
    * @returns
    */
-  getInfoUser: (uuid, tok =null) => {
+  getInfoUser: (uuid, tok = null) => {
     return instance.get(
       `/user/get-user/${uuid}`,
       tok
@@ -48,8 +48,23 @@ const service = {
         : token
     );
   },
+  /**
+   * cette fonction nous permet de recuperer l'ensemble des utilisateur
+   * @returns
+   */
   getAll: () => {
     return instance.get(`/user`);
+  },
+  /**
+   * cette fonction nous permet de bloquer ,supprimer , suspendre un compte
+   * @param {*} action emu active ,banish ,suspend
+   * @param {*} uuid uuid du compte uilisateur qu'on souhaite faire une acction
+   * @returns
+   */
+  managementAccount: (action, uuid, comment = null) => {
+    return instance.patch(`/user/${action}/${uuid}`, {
+      comment: comment ? comment : '',
+    });
   },
 };
 const Atom = {
