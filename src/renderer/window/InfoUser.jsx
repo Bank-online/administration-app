@@ -20,6 +20,7 @@ import AccountControlleur from 'renderer/components/Modal/UserModal/AcountContro
 import UserHelper from '../helpers/UserHelper';
 import { token } from 'renderer/helpers/apiHelper';
 import Skeleton from '@mui/material/Skeleton';
+import FormUser from 'renderer/components/Modal/UserModal';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -42,6 +43,7 @@ export default function InfoUser(props) {
   const [user, setUser] = useState(null);
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [modalUpdate, setModalUpdate] = useState(false);
 
   const navigate = useNavigate();
   React.useEffect(() => {
@@ -67,11 +69,6 @@ export default function InfoUser(props) {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const deleteEnterprise = () => {
-    if (confirm('Are you sure you want to delete this enterprise?')) {
-    }
   };
 
   return (
@@ -137,10 +134,24 @@ export default function InfoUser(props) {
           <h2>Informations sur le client </h2>
           <div>
             <BootstrapTooltip title="modifier les info utilisateur">
-              <IconButton color="primary" size={'6em'}>
+              <IconButton
+                color="primary"
+                size={'6em'}
+                onClick={() => {
+                  setModalUpdate(true);
+                }}
+              >
                 <EditOutlinedIcon />
               </IconButton>
             </BootstrapTooltip>
+            {!isLoading && (
+              <FormUser
+                user={user}
+                setUser={setUser}
+                setOpen={setModalUpdate}
+                open={modalUpdate}
+              />
+            )}
           </div>
         </div>
         <hr />

@@ -12,6 +12,7 @@ import CardUser from '../components/CardUser';
 import { IconButton } from '@mui/material';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import UserHelper from '../helpers/UserHelper';
+import FormUser from 'renderer/components/Modal/UserModal';
 export default function ListUser(props) {
   const [users, setUsers] = useRecoilState(UserHelper.Atom.users);
   const [uuid, setUuid] = useState(null);
@@ -45,6 +46,7 @@ export default function ListUser(props) {
           borderRadius: '10px',
         }}
       >
+
         <div
           style={{
             display: 'flex',
