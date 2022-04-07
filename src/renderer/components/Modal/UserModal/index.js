@@ -21,7 +21,7 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
-import UserHelper from '../../../helpers/UserHelper'
+import UserHelper from '../../../helpers/UserHelper';
 import { useSnackbar } from 'notistack';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -71,6 +71,7 @@ export default function CustomizedDialogs(props) {
   const [email, setEmail] = React.useState(props.user.email);
   const [tel, setTel] = React.useState(props.user.name);
   const [naissance, setNaissance] = React.useState(props.user.birthday);
+  const [dataProvisoir, setDataProvoir] = React.useState(props.user);
 
   const handleClickOpen = () => {
     props.setOpen(true);
@@ -78,11 +79,46 @@ export default function CustomizedDialogs(props) {
   const handleClose = () => {
     props.setOpen(false);
   };
+
+  /**
+   * cette fonction nous permet de remettre les valeur initial en cas d'anulation de modification
+   */
+  const resetData = () => {
+    setPrenom(props.user.forename);
+    setNom(props.user.name);
+    setAddresse(props.user.address);
+    setVille(props.user.city);
+    setPays(props.user.country);
+    setEmail(props.user.email);
+    setTel(props.user.name);
+    setNaissance(props.user.birthday);
+    setDataProvoir(props.user);
+  };
+  const handleCancel = () => {
+    resetData();
+    props.setOpen(false);
+  };
   const handleSubmit = () => {
-    enqueueSnackbar("les modifiaction on bien etait prise en compte", {
-      variant: 'success',
-    });
-    props.setUser((current) => {
+    /**
+     * nous permet de verifier si un element a etait changer ou pas afin d'eviter d'envoyer des requette inutile
+     */
+    let identique = false;
+    setDataProvoir((current) => {
+      if (
+        JSON.stringify(props.user) ==
+        JSON.stringify({
+          ...current,
+          name: nom,
+          forename: prenom,
+          address: addresse,
+          city: ville,
+          country: pays,
+          email: email,
+          birthday: naissance,
+        })
+      ) {
+        identique = true;
+      }
       return {
         ...current,
         name: nom,
@@ -94,6 +130,49 @@ export default function CustomizedDialogs(props) {
         birthday: naissance,
       };
     });
+
+    if (!identique) {
+      let data = {
+        name: nom,
+        forename: prenom,
+        address: addresse,
+        city: ville,
+        country: pays,
+        email: email,
+        birthday: naissance,
+        uuid: props.user.uuid,
+      };
+      UserHelper.service
+        .updateUser(data)
+        .then(() => {
+          props.setUser((current) => {
+            return {
+              ...current,
+              name: nom,
+              forename: prenom,
+              address: addresse,
+              city: ville,
+              country: pays,
+              email: email,
+              birthday: naissance,
+            };
+          });
+          props.setOpen(false);
+          enqueueSnackbar('les modification on bien etait prise en compte', {
+            variant: 'success',
+          });
+        })
+        .catch((e) => {
+          enqueueSnackbar("une erreur c'est produite", {
+            variant: 'error',
+          });
+        });
+    } else {
+      enqueueSnackbar('Aucune modifiaction na était détecter', {
+        variant: 'warning',
+      });
+      handleClose();
+    }
   };
 
   return (
@@ -103,7 +182,7 @@ export default function CustomizedDialogs(props) {
       aria-labelledby="customized-dialog-title"
       open={props.open}
     >
-      <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
+      <BootstrapDialogTitle id="customized-dialog-title" onClose={handleCancel}>
         mise à jour information client
       </BootstrapDialogTitle>
       <DialogContent dividers style={{ width: '800px' }}>
@@ -199,7 +278,7 @@ export default function CustomizedDialogs(props) {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button style={{ color: 'grey' }} onClick={handleClose}>
+        <Button style={{ color: 'grey' }} onClick={handleCancel}>
           Annuler
         </Button>
         <Button style={{ color: 'blue' }} onClick={handleSubmit}>

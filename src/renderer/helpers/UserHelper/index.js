@@ -66,6 +66,14 @@ const service = {
       comment: comment ? comment : '',
     });
   },
+  /**
+   * cette fonction nous permet de mettre a jour des information client
+   * @param {*} data
+   * @returns
+   */
+  updateUser: (data) => {
+    return instance.patch(`/user`, data);
+  },
 };
 const Atom = {
   users,
