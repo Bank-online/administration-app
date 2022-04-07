@@ -21,7 +21,8 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
-
+import UserHelper from '../../../helpers/UserHelper'
+import { useSnackbar } from 'notistack';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -61,7 +62,7 @@ BootstrapDialogTitle.propTypes = {
 };
 
 export default function CustomizedDialogs(props) {
- 
+  const { enqueueSnackbar } = useSnackbar();
   const [prenom, setPrenom] = React.useState(props.user.forename);
   const [nom, setNom] = React.useState(props.user.name);
   const [addresse, setAddresse] = React.useState(props.user.address);
@@ -71,12 +72,28 @@ export default function CustomizedDialogs(props) {
   const [tel, setTel] = React.useState(props.user.name);
   const [naissance, setNaissance] = React.useState(props.user.birthday);
 
-
   const handleClickOpen = () => {
     props.setOpen(true);
   };
   const handleClose = () => {
     props.setOpen(false);
+  };
+  const handleSubmit = () => {
+    enqueueSnackbar("les modifiaction on bien etait prise en compte", {
+      variant: 'success',
+    });
+    props.setUser((current) => {
+      return {
+        ...current,
+        name: nom,
+        forename: prenom,
+        address: addresse,
+        city: ville,
+        country: pays,
+        email: email,
+        birthday: naissance,
+      };
+    });
   };
 
   return (
@@ -99,7 +116,9 @@ export default function CustomizedDialogs(props) {
                 label="prenom"
                 helperText={null}
                 value={prenom}
-                onChange={(e) => {setPrenom(e.target.value)}}
+                onChange={(e) => {
+                  setPrenom(e.target.value);
+                }}
                 onBlur={(e) => {}}
                 fullWidth
               ></TextField>
@@ -111,8 +130,10 @@ export default function CustomizedDialogs(props) {
                 label="nom"
                 helperText={null}
                 value={nom}
-                onChange={(e) => {setNom(e.target.value)}}
-                onBlur={(e) =>{}}
+                onChange={(e) => {
+                  setNom(e.target.value);
+                }}
+                onBlur={(e) => {}}
                 fullWidth
               ></TextField>
             </ListItem>
@@ -181,7 +202,7 @@ export default function CustomizedDialogs(props) {
         <Button style={{ color: 'grey' }} onClick={handleClose}>
           Annuler
         </Button>
-        <Button style={{ color: 'blue' }} onClick={handleClose}>
+        <Button style={{ color: 'blue' }} onClick={handleSubmit}>
           Enregistrer
         </Button>
       </DialogActions>
