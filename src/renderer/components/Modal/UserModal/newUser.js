@@ -38,6 +38,7 @@ import FormGroup from '@mui/material/FormGroup';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Checkbox from '@mui/material/Checkbox';
+import TablePaginationUnstyled from '@mui/base/TablePaginationUnstyled';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -71,6 +72,60 @@ const BootstrapDialogTitle = (props) => {
   );
 };
 
+const Root = styled('div')`
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td,
+  th {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #ddd;
+  }
+`;
+
+const CustomTablePagination = styled(TablePaginationUnstyled)`
+  & .MuiTablePaginationUnstyled-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  & .MuiTablePaginationUnstyled-selectLabel {
+    margin: 0;
+  }
+
+  & .MuiTablePaginationUnstyled-displayedRows {
+    margin: 0;
+
+    @media (min-width: 768px) {
+      margin-left: auto;
+    }
+  }
+
+  & .MuiTablePaginationUnstyled-spacer {
+    display: none;
+  }
+
+  & .MuiTablePaginationUnstyled-actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+`;
+
 BootstrapDialogTitle.propTypes = {
   children: PropTypes.node,
   onClose: PropTypes.func.isRequired,
@@ -78,15 +133,15 @@ BootstrapDialogTitle.propTypes = {
 const steps = ['information utilisateur', 'ouverture compte', 'Recapitulatif'];
 export default function newUser(props) {
   const { enqueueSnackbar } = useSnackbar();
-  const [prenom, setPrenom] = React.useState();
-  const [nom, setNom] = React.useState();
-  const [addresse, setAddresse] = React.useState();
-  const [ville, setVille] = React.useState();
-  const [pays, setPays] = React.useState();
-  const [email, setEmail] = React.useState();
-  const [tel, setTel] = React.useState();
-  const [naissance, setNaissance] = React.useState();
-  const [dataProvisoir, setDataProvoir] = React.useState();
+  const [prenom, setPrenom] = React.useState('');
+  const [nom, setNom] = React.useState('');
+  const [addresse, setAddresse] = React.useState('');
+  const [ville, setVille] = React.useState('');
+  const [pays, setPays] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [tel, setTel] = React.useState('');
+  const [naissance, setNaissance] = React.useState('');
+  const [dataProvisoir, setDataProvoir] = React.useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
   const [createAccount, setCreateAccount] = useState({
@@ -99,6 +154,49 @@ export default function newUser(props) {
     epargne: undefined,
     pro: undefined,
   });
+  const [optionPro, setOptionPro] = React.useState({
+    optionApi: false,
+    optionPrelevement: false,
+    optionEmployee: false,
+  });
+  function createData(name, value, fat = null) {
+    return { name, value, fat };
+  }
+
+  const identite = [
+    createData('nom', nom),
+    createData('prenom', prenom),
+    createData('date de naissance', naissance),
+  ].sort((a, b) => (a.calories < b.calories ? -1 : 1));
+
+  let contact = [
+    createData('email', email),
+    createData('numero', tel),
+    createData('adress', addresse + '' + ville + ',' + pays),
+  ];
+
+  const compte = [
+    createAccount.principal
+      ? createData(
+          'compte principal',
+          '',
+          depot.principal ? depot.principal : 0
+        )
+      : createData('', '', ''),
+    createAccount.pro
+      ? createData(
+          'compte pro',
+          `${optionPro.optionApi ? 'acces Api, ' : ''}  ${
+            optionPro.optionEmployee ? 'compte employer, ' : ''
+          }${optionPro.optionPrelevement ? 'prelevement,' : ''}`,
+          depot.pro ? depot.pro : 0
+        )
+      : createData('', '', ''),
+    ,
+    createAccount.epargne
+      ? createData('compte epargne', '', depot.epargne ? depot.epargne : 0)
+      : createData('', '', ''),
+  ];
 
   const handleClickOpen = () => {
     props.setOpen(true);
@@ -115,6 +213,13 @@ export default function newUser(props) {
   };
 
   const handleNext = () => {
+      if(activeStep ==3){
+          /**
+           * ici le hanleSubmit
+           */
+          resetData(),
+          props.setOpen(false)
+      }
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
       newSkipped = new Set(newSkipped.values());
@@ -155,66 +260,60 @@ export default function newUser(props) {
     setNaissance('');
     setDataProvoir('');
     setActiveStep(0);
+    setDepot({
+      principal: undefined,
+      epargne: undefined,
+      pro: undefined,
+    });
+    setOptionPro({
+      optionApi: false,
+      optionPrelevement: false,
+      optionEmployee: false,
+    });
+    setCreateAccount({
+      principal: true,
+      epargne: false,
+      pro: false,
+    });
   };
   const handleCancel = () => {
     resetData();
     props.setOpen(false);
   };
   const handleSubmit = () => {
-    /**
-     * nous permet de verifier si un element a etait changer ou pas afin d'eviter d'envoyer des requette inutile
-     */
-    let identique = false;
+    let user = {
+      name: nom,
+      forename: prenom,
+      address: addresse,
+      city: ville,
+      country: pays,
+      email: email,
+      birthday: naissance,
+    };
 
-    if (!identique) {
-      let data = {
-        name: nom,
-        forename: prenom,
-        address: addresse,
-        city: ville,
-        country: pays,
-        email: email,
-        birthday: naissance,
-        uuid: props.user.uuid,
-      };
-      UserHelper.service
-        .updateUser(data)
-        .then(() => {
-          props.setUser((current) => {
-            return {
-              ...current,
-              name: nom,
-              forename: prenom,
-              address: addresse,
-              city: ville,
-              country: pays,
-              email: email,
-              birthday: naissance,
-            };
-          });
-          props.setOpen(false);
-          enqueueSnackbar('les modification on bien etait prise en compte', {
-            variant: 'success',
-          });
-        })
-        .catch((e) => {
-          enqueueSnackbar("une erreur c'est produite", {
-            variant: 'error',
-          });
-        });
-    } else {
-      enqueueSnackbar('Aucune modifiaction na était détecter', {
-        variant: 'warning',
-      });
-      handleClose();
-    }
+    let account = {
+      principal: createAccount.principal
+        ? {
+            depot: depot.principal ? depot.principal : 0,
+          }
+        : undefined,
+      epargne: createAccount.epargne
+        ? {
+            depot: depot.epargne ? depot.epargne : 0,
+          }
+        : undefined,
+      pro: createAccount.pro
+        ? {
+            depot: depot.pro ? depot.pro : 0,
+            option: {
+              api: optionPro.optionApi,
+              prelevement: optionPro.optionPrelevement,
+              employee: optionEmployee,
+            },
+          }
+        : undefined,
+    };
   };
-
-  const [optionPro, setOptionPro] = React.useState({
-    optionApi: false,
-    optionPrelevement: false,
-    optionEmployee: false,
-  });
 
   const handleChangePro = (event) => {
     setOptionPro({
@@ -389,6 +488,11 @@ export default function newUser(props) {
                     type="number"
                     style={{ width: 76 }}
                     placeholder={'dépot'}
+                    onChange={(e) => {
+                      setDepot((curent) => {
+                        return { ...curent, principal: e.target.value };
+                      });
+                    }}
                     InputLabelProps={{
                       shrink: true,
                     }}
@@ -428,6 +532,11 @@ export default function newUser(props) {
                     type="number"
                     style={{ width: 76 }}
                     placeholder={'dépot'}
+                    onChange={(e) => {
+                      setDepot((curent) => {
+                        return { ...curent, epargne: e.target.value };
+                      });
+                    }}
                     disabled={!createAccount.epargne ? true : false}
                     InputLabelProps={{
                       shrink: true,
@@ -471,6 +580,11 @@ export default function newUser(props) {
                     placeholder={'dépot'}
                     InputLabelProps={{
                       shrink: true,
+                    }}
+                    onChange={(e) => {
+                      setDepot((curent) => {
+                        return { ...curent, pro: e.target.value };
+                      });
                     }}
                     disabled={!createAccount.pro ? true : false}
                     variant="standard"
@@ -522,11 +636,103 @@ export default function newUser(props) {
             </FormGroup>
           </FormControl>
         )}
+
+        {activeStep == 2 && (
+          <>
+            <Grid container>
+              <Grid item xs={5} style={{ margin: 20 }}>
+                <Root sx={{ maxWidth: '100%', width: 500 }}>
+                  <table aria-label="custom pagination table">
+                    <thead style={{ width: '90%' }}>
+                      <th>information contact</th>
+                    </thead>
+                    <tbody>
+                      {contact.map((row) => (
+                        <tr key={row.name}>
+                          <td style={{ width: 600 }}>{row.name}</td>
+                          <td style={{ width: 800 }} align="right">
+                            {row.value}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr></tr>
+                    </tfoot>
+                  </table>
+                </Root>
+              </Grid>
+              <Grid item xs={5} style={{ margin: 20 }}>
+                <Root sx={{ maxWidth: '100%', width: 500 }}>
+                  <table aria-label="custom pagination table">
+                    <thead>
+                      <th>information identitaire</th>
+                    </thead>
+                    <tbody>
+                      {identite.map((row) => (
+                        <tr key={row.name}>
+                          <td style={{ width: 700 }}>{row.name}</td>
+                          <td style={{ width: 800 }} align="right">
+                            {row.value}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr></tr>
+                    </tfoot>
+                  </table>
+                </Root>
+              </Grid>
+            </Grid>
+            <Grid container>
+              <Root sx={{ maxWidth: '100%', width: 350 }}>
+                <table aria-label="custom pagination table">
+                  <thead>
+                    <th>compte bancaire</th>
+                    <th>option</th>
+                    <th>depot</th>
+                  </thead>
+                  <tbody>
+                    {compte.map((row) =>
+                      row.name != '' ? (
+                        <tr key={row.name}>
+                          <td style={{ width: 700 }}>{row.name}</td>
+                          <td style={{ width: 1000 }} align="right">
+                            {row.value == '' ? 'aucune option' : row.value}
+                          </td>
+                          <td style={{ width: 200 }} align="right">
+                            {row.fat}
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr></tr>
+                      )
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr></tr>
+                  </tfoot>
+                </table>
+              </Root>
+            </Grid>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button style={{ color: 'red' }} onClick={handleCancel}>
           Annuler
         </Button>
+        {activeStep != 0 ? (
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    onClick={handleBack}
+                    sx={{ mr: 1 }}
+                  >
+                    Précédent
+                  </Button>
+                ) : null}
         <Button variant="contained" onClick={handleNext}>
           {activeStep === steps.length - 1 ? 'Valider' : 'Suivant'}
         </Button>
