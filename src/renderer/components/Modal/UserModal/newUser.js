@@ -39,6 +39,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Checkbox from '@mui/material/Checkbox';
 import TablePaginationUnstyled from '@mui/base/TablePaginationUnstyled';
+import validation from '../../../validations/UserValidation';
+import Link from '@mui/material/Link';
+import { useNavigate } from 'react-router-dom';
+import Tooltip from '@mui/material/Tooltip';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -91,47 +95,13 @@ const Root = styled('div')`
   }
 `;
 
-const CustomTablePagination = styled(TablePaginationUnstyled)`
-  & .MuiTablePaginationUnstyled-toolbar {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-
-    @media (min-width: 768px) {
-      flex-direction: row;
-      align-items: center;
-    }
-  }
-
-  & .MuiTablePaginationUnstyled-selectLabel {
-    margin: 0;
-  }
-
-  & .MuiTablePaginationUnstyled-displayedRows {
-    margin: 0;
-
-    @media (min-width: 768px) {
-      margin-left: auto;
-    }
-  }
-
-  & .MuiTablePaginationUnstyled-spacer {
-    display: none;
-  }
-
-  & .MuiTablePaginationUnstyled-actions {
-    display: flex;
-    gap: 0.25rem;
-  }
-`;
-
 BootstrapDialogTitle.propTypes = {
   children: PropTypes.node,
   onClose: PropTypes.func.isRequired,
 };
 const steps = ['information utilisateur', 'ouverture compte', 'Recapitulatif'];
 export default function newUser(props) {
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [prenom, setPrenom] = React.useState('');
   const [nom, setNom] = React.useState('');
@@ -144,6 +114,7 @@ export default function newUser(props) {
   const [dataProvisoir, setDataProvoir] = React.useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(true);
   const [createAccount, setCreateAccount] = useState({
     principal: true,
     epargne: false,
@@ -159,6 +130,25 @@ export default function newUser(props) {
     optionPrelevement: false,
     optionEmployee: false,
   });
+  const [error, setError] = useState({
+    name: false,
+    forename: false,
+    address: false,
+    city: false,
+    country: false,
+    email: false,
+    birthday: false,
+    phoneNumber: false,
+  });
+
+  const [link, setLink] = useState(null);
+
+  const handleCheckErorr = (name, value) => {
+    setError({
+      ...error,
+      [name]: value,
+    });
+  };
   function createData(name, value, fat = null) {
     return { name, value, fat };
   }
@@ -212,14 +202,42 @@ export default function newUser(props) {
     return skipped.has(step);
   };
 
-  const handleNext = () => {
-      if(activeStep ==3){
-          /**
-           * ici le hanleSubmit
-           */
-          resetData(),
-          props.setOpen(false)
+  const handleNext = async () => {
+    if (activeStep == 0) {
+      let user = {
+        name: nom,
+        forename: prenom,
+        address: addresse,
+        city: ville,
+        country: pays,
+        email: email,
+        birthday: naissance,
+        phoneNumber: tel,
+      };
+      if (await validation.validateUsers(user)) {
+        setError(await validation.validateUsers(user));
+        return;
       }
+      let validForm = Object.values(error);
+      /**find erreur  trouver un moyen plus opti*/
+      let contentError = false;
+      validForm.map((value, key) => {
+        if (value) {
+          return (contentError = true);
+        }
+      });
+      console.log(contentError);
+      if (contentError) {
+        return;
+      }
+    }
+    if (activeStep == 2) {
+      /**
+       * ici le hanleSubmit
+       */
+      resetData(), props.setOpen(false);
+      return;
+    }
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
       newSkipped = new Set(newSkipped.values());
@@ -275,6 +293,16 @@ export default function newUser(props) {
       epargne: false,
       pro: false,
     });
+    setError({
+      name: false,
+      forename: false,
+      address: false,
+      city: false,
+      country: false,
+      email: false,
+      birthday: false,
+      phoneNumber: false,
+    });
   };
   const handleCancel = () => {
     resetData();
@@ -289,6 +317,7 @@ export default function newUser(props) {
       country: pays,
       email: email,
       birthday: naissance,
+      phoneNumber: tel,
     };
 
     let account = {
@@ -329,6 +358,8 @@ export default function newUser(props) {
     });
   };
 
+  const checkEmail = async (email) => {};
+
   return (
     <BootstrapDialog
       maxWidth={'md'}
@@ -339,6 +370,7 @@ export default function newUser(props) {
       <BootstrapDialogTitle id="customized-dialog-title" onClose={handleCancel}>
         formulaire nouveau client
       </BootstrapDialogTitle>
+
       <DialogContent
         dividers
         style={{
@@ -373,49 +405,120 @@ export default function newUser(props) {
               <ListItem>
                 <TextField
                   required
-                  error={null}
+                  error={error.forename ? true : false}
                   label="prenom"
-                  helperText={null}
+                  helperText={error.forename}
                   value={prenom}
                   onChange={(e) => {
                     setPrenom(e.target.value);
                   }}
-                  onBlur={(e) => {}}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateFielsString(prenom, true))) {
+                      handleCheckErorr('forename', 'ce champs est requis');
+                    } else {
+                      handleCheckErorr('forename', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
               <ListItem>
                 <TextField
                   required
-                  error={null}
+                  error={error.name ? true : false}
                   label="nom"
-                  helperText={null}
+                  helperText={error.name}
                   value={nom}
                   onChange={(e) => {
                     setNom(e.target.value);
                   }}
-                  onBlur={(e) => {}}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateFielsString(nom, true))) {
+                      handleCheckErorr('name', 'ce champs est requis');
+                    } else {
+                      handleCheckErorr('name', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
               <ListItem>
                 <TextField
                   required
-                  error={''}
+                  error={error.email ? true : false}
                   label="adresse email"
-                  helperText={''}
+                  helperText={error.email}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={async (e) => {}}
+                  onChange={async (e) => {
+                    setEmail(e.target.value);
+                    if (await validation.validateEmail(email, true)) {
+                      UserHelper.service
+                        .checkExisteUser({ email: e.target.value })
+                        .then(({ data }) => {
+                          if (data.userExiste) {
+                            setLink(data.userExiste);
+                            handleCheckErorr(
+                              'email',
+                              'cette adrress email est deja utiliser'
+                            );
+                          } else {
+                            handleCheckErorr('email', false);
+                            setLink(null);
+                          }
+                        })
+                        .catch((e) => console.log(e));
+                      return;
+                    }
+                  }}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateEmail(email, true))) {
+                      handleCheckErorr(
+                        'email',
+                        email == '' || !email
+                          ? 'champs requis'
+                          : 'email invalide'
+                      );
+                    } else {
+                      UserHelper.service
+                        .checkExisteUser({ email: e.target.value })
+                        .then(({ data }) => {
+                          if (data.userExiste) {
+                            setLink(data.userExiste);
+                            handleCheckErorr(
+                              'email',
+                              'cette adrress email est deja utiliser'
+                            );
+                          } else {
+                            setLink(null);
+                            handleCheckErorr('email', false);
+                          }
+                        })
+                        .catch((e) => console.log(e));
+                      return;
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
               <ListItem>
                 <TextField
                   label="numero de telephone"
-                  helperText=""
+                  helperText={error.phoneNumber}
                   type="tel"
+                  error={error.phoneNumber ? true : false}
                   value={tel}
+                  onBlur={async (e) => {
+                    if (!(await validation.validatePhone(tel, true))) {
+                      handleCheckErorr(
+                        'phoneNumber',
+                        tel == '' || !tel
+                          ? 'champs requis'
+                          : 'numero de telephone invalide'
+                      );
+                    } else {
+                      handleCheckErorr('phoneNumber', false);
+                    }
+                  }}
                   onChange={(e) => setTel(e.target.value)}
                   fullWidth
                 ></TextField>
@@ -425,34 +528,73 @@ export default function newUser(props) {
               <ListItem>
                 <TextField
                   label="date de naissance"
-                  helperText=""
                   value={naissance}
+                  helperText={error.birthday}
+                  error={error.birthday ? true : false}
                   onChange={(e) => setNaissance(e.target.value)}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateDate(naissance, true))) {
+                      handleCheckErorr(
+                        'birthday',
+                        naissance == ''
+                          ? 'ce champs est requis'
+                          : 'format accepte JJ/MM/AAAA'
+                      );
+                    } else {
+                      handleCheckErorr('birthday', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
               <ListItem>
                 <TextField
                   label="Addresse"
-                  helperText=""
+                  helperText={error.address}
+                  error={error.address ? true : false}
                   value={addresse}
                   onChange={(e) => setAddresse(e.target.value)}
+                  onBlur={async (e) => {
+                    if (
+                      !(await validation.validateFielsString(addresse, true))
+                    ) {
+                      handleCheckErorr('address', 'ce champs est requis');
+                    } else {
+                      handleCheckErorr('address', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
               <ListItem>
                 <TextField
                   label="ville"
-                  helperText=""
                   value={ville}
                   onChange={(e) => setVille(e.target.value)}
+                  helperText={error.city}
+                  error={error.city ? true : false}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateFielsString(ville, true))) {
+                      handleCheckErorr('city', 'ce champs est requis');
+                    } else {
+                      handleCheckErorr('city', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
                 <TextField
                   label="pays"
-                  helperText=""
+                  helperText={error.country}
+                  error={error.country ? true : false}
                   value={pays}
                   onChange={(e) => setPays(e.target.value)}
+                  onBlur={async (e) => {
+                    if (!(await validation.validateFielsString(pays, true))) {
+                      handleCheckErorr('country', 'ce champs est requis');
+                    } else {
+                      handleCheckErorr('country', false);
+                    }
+                  }}
                   fullWidth
                 ></TextField>
               </ListItem>
@@ -718,22 +860,52 @@ export default function newUser(props) {
             </Grid>
           </>
         )}
+        {link && (
+          <p>
+            <strong style={{ color: 'red' }}>
+              cette utilisateur est deja titulaire d'un compte :
+            </strong>
+            <Tooltip
+              title="Acceder au profile de l'utilisateur"
+              arrow
+              placement="top"
+            >
+              <Link
+                href="#"
+                color="inherit"
+                onClick={() => {
+                  navigate(`/user/${link.uuid}`, {
+                    state: {},
+                  });
+                }}
+              >
+                {link.name}
+              </Link>
+            </Tooltip>
+          </p>
+        )}
       </DialogContent>
+
       <DialogActions>
         <Button style={{ color: 'red' }} onClick={handleCancel}>
           Annuler
         </Button>
         {activeStep != 0 ? (
-                  <Button
-                    variant="contained"
-                    color="inherit"
-                    onClick={handleBack}
-                    sx={{ mr: 1 }}
-                  >
-                    Précédent
-                  </Button>
-                ) : null}
-        <Button variant="contained" onClick={handleNext}>
+          <Button
+            variant="contained"
+            color="inherit"
+            onClick={handleBack}
+            sx={{ mr: 1 }}
+          >
+            Précédent
+          </Button>
+        ) : null}
+
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          disabled={link ? true : false}
+        >
           {activeStep === steps.length - 1 ? 'Valider' : 'Suivant'}
         </Button>
       </DialogActions>

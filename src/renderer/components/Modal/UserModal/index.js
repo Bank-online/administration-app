@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
@@ -23,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import UserHelper from '../../../helpers/UserHelper';
 import { useSnackbar } from 'notistack';
+import validation from '../../../validations/UserValidation';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -93,12 +94,39 @@ export default function CustomizedDialogs(props) {
     setTel(props.user.name);
     setNaissance(props.user.birthday);
     setDataProvoir(props.user);
+    setError({
+      name: false,
+      forename: false,
+      address: false,
+      city: false,
+      country: false,
+      email: false,
+      birthday: false,
+      phoneNumber: false,
+    });
   };
   const handleCancel = () => {
     resetData();
     props.setOpen(false);
   };
-  const handleSubmit = () => {
+  const [error, setError] = useState({
+    name: false,
+    forename: false,
+    address: false,
+    city: false,
+    country: false,
+    email: false,
+    birthday: false,
+    phoneNumber: false,
+  });
+
+  const handleCheckErorr = (name, value) => {
+    setError({
+      ...error,
+      [name]: value,
+    });
+  };
+  const handleSubmit = async () => {
     /**
      * nous permet de verifier si un element a etait changer ou pas afin d'eviter d'envoyer des requette inutile
      */
@@ -140,8 +168,24 @@ export default function CustomizedDialogs(props) {
         country: pays,
         email: email,
         birthday: naissance,
+        phoneNumber: tel,
         uuid: props.user.uuid,
       };
+      if (await validation.validateUsers(data)) {
+        setError(await validation.validateUsers(data));
+        return;
+      }
+      let validForm = Object.values(error);
+      /**find erreur  trouver un moyen plus opti*/
+      let contentError = false;
+      validForm.map((value, key) => {
+        if (value) {
+          return (contentError = true);
+        }
+      });
+      if (contentError) {
+        return;
+      }
       UserHelper.service
         .updateUser(data)
         .then(() => {
@@ -172,6 +216,7 @@ export default function CustomizedDialogs(props) {
         variant: 'warning',
       });
       handleClose();
+      resetData();
     }
   };
 
@@ -191,49 +236,122 @@ export default function CustomizedDialogs(props) {
             <ListItem>
               <TextField
                 required
-                error={null}
+                error={error.forename ? true : false}
                 label="prenom"
-                helperText={null}
+                helperText={error.forename}
                 value={prenom}
                 onChange={(e) => {
                   setPrenom(e.target.value);
                 }}
-                onBlur={(e) => {}}
+                onBlur={async (e) => {
+                  if (!(await validation.validateFielsString(prenom, true))) {
+                    handleCheckErorr('forename', 'ce champs est requis');
+                  } else {
+                    handleCheckErorr('forename', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>
             <ListItem>
               <TextField
                 required
-                error={null}
+                error={error.name ? true : false}
                 label="nom"
-                helperText={null}
+                helperText={error.name}
                 value={nom}
                 onChange={(e) => {
                   setNom(e.target.value);
                 }}
-                onBlur={(e) => {}}
+                onBlur={async (e) => {
+                  if (!(await validation.validateFielsString(nom, true))) {
+                    handleCheckErorr('name', 'ce champs est requis');
+                  } else {
+                    handleCheckErorr('name', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>
             <ListItem>
               <TextField
                 required
-                error={''}
+                error={error.email ? true : false}
                 label="adresse email"
-                helperText={''}
+                helperText={error.email}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={async (e) => {}}
+                onChange={async (e) => {
+                  setEmail(e.target.value);
+                  if (
+                    (await validation.validateEmail(email, true)) &&
+                    email != props.email
+                  ) {
+                    UserHelper.service
+                      .checkExisteUser({ email: e.target.value })
+                      .then(({ data }) => {
+                        if (data.userExiste) {
+                          if (e.target.value != props.user.email) {
+                            handleCheckErorr(
+                              'email',
+                              'cette adrress email est deja utiliser'
+                            );
+                          } else {
+                            handleCheckErorr('email', false);
+                          }
+                        }
+                      })
+                      .catch((e) => console.log(e));
+                    return;
+                  }
+                }}
+                onBlur={async (e) => {
+                  if (!(await validation.validateEmail(email, true))) {
+                    handleCheckErorr(
+                      'email',
+                      email == '' || !email ? 'champs requis' : 'email invalide'
+                    );
+                  } else {
+                    UserHelper.service
+                      .checkExisteUser({ email: e.target.value })
+                      .then(({ data }) => {
+                        if (data.userExiste) {
+                          console.log(email, props.user.email);
+                          if (email !== props.user.email) {
+                            handleCheckErorr(
+                              'email',
+                              'cette adrress email est deja utiliser'
+                            );
+                          }
+                        } else {
+                          handleCheckErorr('email', false);
+                        }
+                      })
+                      .catch((e) => console.log(e));
+                    return;
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>
             <ListItem>
               <TextField
                 label="numero de telephone"
-                helperText=""
+                helperText={error.phoneNumber}
                 type="tel"
+                error={error.phoneNumber ? true : false}
                 value={tel}
+                onBlur={async (e) => {
+                  if (!(await validation.validatePhone(tel, true))) {
+                    handleCheckErorr(
+                      'phoneNumber',
+                      tel == '' || !tel
+                        ? 'champs requis'
+                        : 'numero de telephone invalide'
+                    );
+                  } else {
+                    handleCheckErorr('phoneNumber', false);
+                  }
+                }}
                 onChange={(e) => setTel(e.target.value)}
                 fullWidth
               ></TextField>
@@ -243,34 +361,71 @@ export default function CustomizedDialogs(props) {
             <ListItem>
               <TextField
                 label="date de naissance"
-                helperText=""
                 value={naissance}
+                helperText={error.birthday}
+                error={error.birthday ? true : false}
                 onChange={(e) => setNaissance(e.target.value)}
+                onBlur={async (e) => {
+                  if (!(await validation.validateDate(naissance, true))) {
+                    handleCheckErorr(
+                      'birthday',
+                      naissance == ''
+                        ? 'ce champs est requis'
+                        : 'format accepte JJ/MM/AAAA'
+                    );
+                  } else {
+                    handleCheckErorr('birthday', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>
             <ListItem>
               <TextField
                 label="Addresse"
-                helperText=""
+                helperText={error.address}
+                error={error.address ? true : false}
                 value={addresse}
                 onChange={(e) => setAddresse(e.target.value)}
+                onBlur={async (e) => {
+                  if (!(await validation.validateFielsString(addresse, true))) {
+                    handleCheckErorr('address', 'ce champs est requis');
+                  } else {
+                    handleCheckErorr('address', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>
             <ListItem>
               <TextField
                 label="ville"
-                helperText=""
                 value={ville}
                 onChange={(e) => setVille(e.target.value)}
+                helperText={error.city}
+                error={error.city ? true : false}
+                onBlur={async (e) => {
+                  if (!(await validation.validateFielsString(ville, true))) {
+                    handleCheckErorr('city', 'ce champs est requis');
+                  } else {
+                    handleCheckErorr('city', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
               <TextField
                 label="pays"
-                helperText=""
+                helperText={error.country}
+                error={error.country ? true : false}
                 value={pays}
                 onChange={(e) => setPays(e.target.value)}
+                onBlur={async (e) => {
+                  if (!(await validation.validateFielsString(pays, true))) {
+                    handleCheckErorr('country', 'ce champs est requis');
+                  } else {
+                    handleCheckErorr('country', false);
+                  }
+                }}
                 fullWidth
               ></TextField>
             </ListItem>

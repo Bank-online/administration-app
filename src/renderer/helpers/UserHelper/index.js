@@ -74,6 +74,13 @@ const service = {
   updateUser: (data) => {
     return instance.patch(`/user`, data);
   },
+  /**
+   * cette fonction nous permet de verifier si un utilisateur existe
+   * @param {*} user
+   */
+  checkExisteUser: (user) => {
+    return instance.post(`/user/checkUser`, user);
+  },
 };
 const Atom = {
   users,
