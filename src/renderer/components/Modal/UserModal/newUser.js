@@ -347,6 +347,9 @@ export default function newUser(props) {
       .register(user)
       .then(({ data }) => {
         account.uuid = data.uuid;
+        props.setUsers((curent) => {
+          return [...curent, data];
+        });
         return AccountHelpers.service.create(account);
       })
       .then(({ data }) => {

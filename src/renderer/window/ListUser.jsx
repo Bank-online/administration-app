@@ -106,7 +106,7 @@ export default function ListUser(props) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <FormUser open={open} setOpen={setOpen} />
+            <FormUser open={open} setOpen={setOpen}  setUsers={setUsers}/>
           </div>
         </div>
       </Paper>
