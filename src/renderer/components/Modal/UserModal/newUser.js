@@ -43,6 +43,7 @@ import validation from '../../../validations/UserValidation';
 import Link from '@mui/material/Link';
 import { useNavigate } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
+import AccountHelpers from '../../../helpers/AccountHelper';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -165,7 +166,7 @@ export default function newUser(props) {
     createData('adress', addresse + '' + ville + ',' + pays),
   ];
 
-  const compte = [
+  let compte = [
     createAccount.principal
       ? createData(
           'compte principal',
@@ -232,8 +233,8 @@ export default function newUser(props) {
       }
     }
     if (activeStep == 2) {
-      UserHelper.service.
-      resetData(), props.setOpen(false);
+      handleSubmit();
+
       return;
     }
     let newSkipped = skipped;
@@ -341,6 +342,28 @@ export default function newUser(props) {
         : undefined,
       uuid: undefined,
     };
+
+    UserHelper.service
+      .register(user)
+      .then(({ data }) => {
+        account.uuid = data.uuid;
+        return AccountHelpers.service.create(account);
+      })
+      .then(({ data }) => {
+        enqueueSnackbar(
+          'la creation du compte utilisateur a bien etait prise en compte',
+          {
+            variant: 'success',
+          }
+        );
+        resetData();
+        props.setOpen(false);
+      })
+      .catch(() => {
+        enqueueSnackbar("une erreur c'est produite", {
+          variant: 'error',
+        });
+      });
   };
 
   const handleChangePro = (event) => {

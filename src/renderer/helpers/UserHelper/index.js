@@ -81,6 +81,14 @@ const service = {
   checkExisteUser: (user) => {
     return instance.post(`/user/checkUser`, user);
   },
+  /**
+   * cette fonction nous permet d'enregister un utilisateur
+   * @param {*} data
+   * @returns la data lier a l'utilisateur
+   */
+  register: (data) => {
+    return instance.post(`/user/register`, data);
+  },
 };
 const Atom = {
   users,
