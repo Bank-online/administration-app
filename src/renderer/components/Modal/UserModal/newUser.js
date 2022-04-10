@@ -232,9 +232,7 @@ export default function newUser(props) {
       }
     }
     if (activeStep == 2) {
-      /**
-       * ici le hanleSubmit
-       */
+      UserHelper.service.
       resetData(), props.setOpen(false);
       return;
     }
@@ -341,6 +339,7 @@ export default function newUser(props) {
             },
           }
         : undefined,
+      uuid: undefined,
     };
   };
 

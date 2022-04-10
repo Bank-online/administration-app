@@ -14,7 +14,8 @@ import Badge from '@material-ui/core/Badge';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
+import {secondaryListItems } from './listItems';
+import MainListItems from'./MainListItems'
 import { useRecoilState } from 'recoil';
 import userHelper from '../../helpers/UserHelper';
 import Power from '@material-ui/icons/PowerSettingsNew';
@@ -189,7 +190,7 @@ const Dashboard = (props) => {
             </IconButton>
           </div>
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems/></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
