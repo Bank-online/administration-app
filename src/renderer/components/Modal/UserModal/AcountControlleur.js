@@ -56,8 +56,19 @@ export default function AccountControlleur(props) {
   const { enqueueSnackbar } = useSnackbar();
   const statusAccount = () => {
     let info = {};
-
-    if (!props.infoUser.isActive) {
+    if (
+      !props.infoUser.isActive &&
+      !props.infoUser.isSuspended &&
+      !props.infoUser.deleted &&
+      !props.infoUser.isBanned
+    ) {
+      return (info = {
+        status: "demande d'ouverture",
+        comment:
+          "compte client en attent d'approbation pour l'ouverture du compte",
+        state: false,
+      });
+    } else if (!props.infoUser.isActive) {
       info.status = 'Désactiver';
       info.comment = props.infoUser.comment;
       info.state = false;
@@ -117,7 +128,7 @@ export default function AccountControlleur(props) {
       setStateAccount({
         ...stateAccount,
         [event.target.name]: event.target.checked,
-        ['status'] : "Désactiver"
+        ['status']: 'Désactiver',
       });
     } else {
       UserHelpers.service
@@ -178,7 +189,7 @@ export default function AccountControlleur(props) {
                     title={
                       <React.Fragment>
                         <Typography color="inherit">
-                        Compte  {stateAccount.status}
+                          Compte {stateAccount.status}
                         </Typography>
                         <div
                           dangerouslySetInnerHTML={{

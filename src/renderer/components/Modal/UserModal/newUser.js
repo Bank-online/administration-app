@@ -336,7 +336,7 @@ export default function newUser(props) {
             option: {
               api: optionPro.optionApi,
               prelevement: optionPro.optionPrelevement,
-              employee: optionEmployee,
+              employee: optionPro.optionEmployee,
             },
           }
         : undefined,
