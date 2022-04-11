@@ -21,6 +21,7 @@ import UserHelper from '../helpers/UserHelper';
 import { token } from 'renderer/helpers/apiHelper';
 import Skeleton from '@mui/material/Skeleton';
 import FormUser from 'renderer/components/Modal/UserModal';
+import AccountHelper from '../helpers/AccountHelper';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -44,6 +45,7 @@ export default function InfoUser(props) {
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [modalUpdate, setModalUpdate] = useState(false);
+  const [account, setAccount] = useState([]);
 
   const navigate = useNavigate();
   React.useEffect(() => {
@@ -51,6 +53,12 @@ export default function InfoUser(props) {
       .getInfoUser(uuid)
       .then(({ data }) => {
         setUser(data);
+        return AccountHelper.service.AllAccountUser(uuid);
+      })
+      .then(({ data }) => {
+        console.log(data);
+        setAccount(data);
+
         setIsLoading(false);
       })
       .catch((e) => console.log(e));
@@ -288,7 +296,19 @@ export default function InfoUser(props) {
           </div>
         </div>
         <hr />
-        <CardAccount style={{ width: '23em' }} />
+        <Grid container style={{ display: 'flex' }}>
+          {account.map((value, index) => {
+            return (
+              <Grid>
+                <CardAccount
+                  account={value}
+                  key={index}
+                  style={{ width: '23em' }}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
       </Paper>
       {!isLoading && (
         <AccountControlleur

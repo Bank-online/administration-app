@@ -16,6 +16,22 @@ const service = {
   create: (data) => {
     return instance.post(`/account`, data);
   },
+  /**
+   * cette function nous permet de recuperer les compte bancaire lier a un utilisateur
+   * @param {*} uuid
+   * @returns
+   */
+  AllAccountUser: (uuid) => {
+    return instance.get(`/accounts/${uuid}`);
+  },
+  /**
+   * cette fonction nous permet de recuperer les information et les operation liee a un compte bancaire
+   * @param {*} uuid
+   * @returns
+   */
+  getAccount: (uuid) => {
+    return instance.get(`/account/${uuid}`);
+  },
 };
 const Atom = {
   accounts,
