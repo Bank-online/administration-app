@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import { Avatar, Box, Button, Grid, Paper, TextField } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  Paper,
+  TextField,
+  IconButton,
+} from '@mui/material';
 import AccountIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import EmailIcon from '@mui/icons-material/Email';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import FlagIcon from '@mui/icons-material/Flag';
 import HomeIcon from '@mui/icons-material/Home';
 import { useNavigate } from 'react-router-dom';
-import { IconButton } from '@mui/material';
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
@@ -22,6 +29,7 @@ import { token } from 'renderer/helpers/apiHelper';
 import Skeleton from '@mui/material/Skeleton';
 import FormUser from 'renderer/components/Modal/UserModal';
 import AccountHelper from '../helpers/AccountHelper';
+import AccountModal from '../components/Modal/AccountModal';
 const BootstrapTooltip = styled(({ className, ...props }) => (
   <Tooltip
     {...props}
@@ -46,6 +54,11 @@ export default function InfoUser(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [modalUpdate, setModalUpdate] = useState(false);
   const [account, setAccount] = useState([]);
+  const [modal, setModal] = useState({
+    comptePro: false,
+    compteEpargne: false,
+    comptePrincipal: false,
+  });
 
   const navigate = useNavigate();
   React.useEffect(() => {
@@ -317,30 +330,6 @@ export default function InfoUser(props) {
           infoUser={user}
         />
       )}
-      ;
-      {/* <Paper
-        elevation={2}
-        sx={{
-          p: 5,
-          mb: 5,
-          width: '100%',
-          borderRadius: '10px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <div>
-            <h2>Informations sur les options</h2>
-          </div>
-          <div></div>
-        </div>
-        <hr />
-      </Paper> */}
     </Box>
   );
 }

@@ -14,6 +14,7 @@ import { Paper, Tooltip } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import DisplaySettingsOutlinedIcon from '@mui/icons-material/DisplaySettingsOutlined';
 import IconButton from '@mui/material/IconButton';
+import AccountModal from '../../components/Modal/AccountModal';
 const actions = [
   { icon: <EditIcon />, name: 'Editer' },
   { icon: <HistoryIcon />, name: 'Historique' },
@@ -21,11 +22,14 @@ const actions = [
 ];
 
 function SpeedDialComponent(props) {
-
+  const handleOpen = () => {
+    props.setModal(true);
+  };
   return (
     <Box sx={{ transform: 'translateZ(0px)', flexGrow: 1 }}>
       {props.isHover && (
         <IconButton
+          onClick={handleOpen}
           aria-label="delete"
           size="small"
           sx={{
@@ -46,16 +50,15 @@ export default function Card(props) {
   const [isHover, setisHover] = useState(false);
   const [isHoverButton, setisHoverButton] = useState(false);
   const { account } = props;
+  const [open, setOpen] = useState(false);
   const handleOverIn = () => {
     setisHover(true);
   };
 
   const handleOverOut = () => {
-    setTimeout(()=>{
+    setTimeout(() => {
       setisHover(false);
-    },4000)
-     
-    
+    }, 4000);
   };
 
   return (
@@ -107,6 +110,8 @@ export default function Card(props) {
           <SpeedDialComponent
             setisHoverButton={setisHoverButton}
             isHover={isHover}
+            modal={open}
+            setModal={setOpen}
           />
         }
         <p>
@@ -127,6 +132,7 @@ export default function Card(props) {
             kmf
           </span>
         </p>
+        <AccountModal modal={open} setModal={setOpen} {...props} />
       </div>
     </Paper>
   );
