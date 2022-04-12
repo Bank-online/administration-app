@@ -183,6 +183,7 @@ export default function VerticalTabs(props) {
    */
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [account, setAccount] = useState([]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -193,14 +194,16 @@ export default function VerticalTabs(props) {
     setPage(0);
   };
   const [rows, setRows] = useState([]);
-
+  /**
+   *end historique operation
+   */
   useEffect(() => {
     if (modal) {
       AccountHelper.service
         .getAccount(props.account.uuid)
         .then(({ data }) => {
           let row = [];
-
+          setAccount(data.account);
           data.operation.map((value, index) => {
             var today = new Date(value.createdAt);
             var dd = String(today.getDate()).padStart(2, '0');
@@ -283,6 +286,7 @@ export default function VerticalTabs(props) {
                     <Tab label="Prélèvement" {...a11yProp(2)} />
                     <Tab label="a venir" {...a11yProp(2)} />
                   </Tabs>
+                  {/* operation */}
                   <TabPanelVerticale
                     sx={{ p: 0 }}
                     value={valueVertical}
@@ -294,6 +298,24 @@ export default function VerticalTabs(props) {
                       >
                         <Table stickyHeader aria-label="sticky table">
                           <TableHead>
+                            <TableRow>
+                              <TableCell colSpan={1}>
+                                <strong>solde acctuel : </strong>{' '}
+                                <strong
+                                  style={{
+                                    color: account.solde > 0 ? 'green' : 'red ',
+                                    fontSize: '1.2em',
+                                  }}
+                                >
+                                  {account.solde > 1
+                                    ? `+ ${account.solde}`
+                                    : account.solde}
+                                </strong>
+                              </TableCell>
+                              {/* <TableCell  colSpan={1}>
+                                Details
+                              </TableCell> */}
+                            </TableRow>
                             <TableRow>
                               {columns.map((column) => (
                                 <TableCell
@@ -338,8 +360,8 @@ export default function VerticalTabs(props) {
                                               column.id == 'credit' ||
                                               column.id == 'debit'
                                                 ? column.id == 'credit'
-                                                  ? '1.1em'
-                                                  : '1.1em'
+                                                  ? '1em'
+                                                  : '1em'
                                                 : null,
                                           }}
                                         >
@@ -358,17 +380,21 @@ export default function VerticalTabs(props) {
                           </TableBody>
                         </Table>
                       </TableContainer>
-                      <TablePagination
-                        rowsPerPageOptions={[10, 25, 100]}
-                        component="div"
-                        count={rows.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                      />
+                      {rows.length && (
+                        <TablePagination
+                          rowsPerPageOptions={[8]}
+                          component="div"
+                          count={rows.length}
+                          rowsPerPage={rowsPerPage}
+                          page={page}
+                          onPageChange={handleChangePage}
+                          onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
+                      )}
                     </Paper>
                   </TabPanelVerticale>
+                  {/* end operation */}
+
                   <TabPanelVerticale value={valueVertical} section={1}>
                     Item Two
                   </TabPanelVerticale>

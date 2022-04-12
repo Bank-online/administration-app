@@ -6,7 +6,7 @@ import { useRecoilState } from 'recoil';
 import userHelper from './helpers/UserHelper';
 import Logout from './window/Logout';
 import Bank from './window/Bank';
-import InfoUser from './window/infoUser';
+import InfoUser from './window/InfoUser';
 import ListUser from './window/ListUser';
 
 const BankRouter = () => {
