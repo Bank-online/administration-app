@@ -12,7 +12,7 @@ import AssignmentIcon from '@material-ui/icons/Assignment';
 import AccountBalanceOutlinedIcon from '@material-ui/icons/AccountBalanceOutlined';
 import { useNavigate } from 'react-router-dom';
 
-export default MainListItems = () => {
+const MainListItems = () => {
   const navigate = useNavigate();
   return (
     <div>
@@ -57,3 +57,4 @@ export default MainListItems = () => {
     </div>
   );
 };
+export default MainListItems;
